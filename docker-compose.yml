@@ -1,0 +1,115 @@
+# AI QA Under Control — system under test.
+#
+#   docker compose up -d                  -> infra only (services run from the host via ./run.sh or the IDE)
+#   docker compose --profile apps up -d   -> infra + both Spring Boot services (mvn package first)
+#   docker compose --profile tools up -d  -> adds Kafka UI
+#
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: aqc-postgres
+    environment:
+      POSTGRES_DB: arcade
+      POSTGRES_USER: arcade
+      POSTGRES_PASSWORD: arcade
+    ports:
+      - "5433:5432"   # 5433 on the host: 5432 is often taken by a local Postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arcade -d arcade"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  kafka:
+    image: apache/kafka:3.8.0
+    container_name: aqc-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9094:9094"   # external listener for apps/tests running on the host
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: aqc-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  wiremock:
+    image: wiremock/wiremock:3.9.1
+    container_name: aqc-wiremock
+    command: ["--global-response-templating"]
+    volumes:
+      - ./infra/wiremock:/home/wiremock
+    ports:
+      - "8089:8080"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: aqc-kafka-ui
+    profiles: ["tools"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8090:8080"
+
+  player-service:
+    build: ./player-service
+    container_name: aqc-player-service
+    profiles: ["apps"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcade
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATA_REDIS_HOST: redis
+      PAYMENT_BASE_URL: http://wiremock:8080
+      GRPC_CLIENT_STATS-SERVICE_ADDRESS: static://analytics-service:6565
+    ports:
+      - "8080:8080"
+
+  analytics-service:
+    build: ./analytics-service
+    container_name: aqc-analytics-service
+    profiles: ["apps"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcade
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8081:8081"
+      - "6565:6565"

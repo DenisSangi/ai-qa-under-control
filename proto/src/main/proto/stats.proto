@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package arcade.stats.v1;
+
+option java_multiple_files = true;
+option java_package = "com.arcade.grpc.stats";
+option java_outer_classname = "StatsProto";
+
+// Contract between player-service (client) and analytics-service (server).
+// Money is transferred as decimal strings to avoid floating-point precision issues.
+service StatsService {
+  rpc GetPlayerStats(PlayerStatsRequest) returns (PlayerStatsResponse);
+}
+
+message PlayerStatsRequest {
+  int64 player_id = 1;
+}
+
+message PlayerStatsResponse {
+  int64 player_id = 1;
+  int64 total_sessions = 2;
+  string total_bet = 3;
+  string total_win = 4;
+  // return-to-player, percent with 2 decimals, e.g. "96.50"
+  string rtp = 5;
+}

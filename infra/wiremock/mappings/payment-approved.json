@@ -1,0 +1,16 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/payments"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "status": "APPROVED",
+      "transactionId": "{{randomValue type='UUID'}}",
+      "reason": null
+    }
+  }
+}

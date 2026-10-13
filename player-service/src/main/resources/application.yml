@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: player-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/arcade
+    username: arcade
+    password: arcade
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+
+payment:
+  base-url: http://localhost:8089
+
+grpc:
+  client:
+    stats-service:
+      address: static://localhost:6565
+      negotiation-type: plaintext
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+app:
+  leaderboard-cache-ttl-seconds: 30

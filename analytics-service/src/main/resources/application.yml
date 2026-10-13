@@ -1,0 +1,42 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: analytics-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/arcade
+    username: arcade
+    password: arcade
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: analytics
+    open-in-view: false
+  flyway:
+    enabled: true
+    schemas: analytics
+    default-schema: analytics
+    create-schemas: true
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: analytics
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+grpc:
+  server:
+    port: 6565
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always

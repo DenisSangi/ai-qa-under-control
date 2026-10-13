@@ -1,0 +1,17 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/payments/slow"
+  },
+  "response": {
+    "status": 200,
+    "fixedDelayMilliseconds": 5000,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "status": "APPROVED",
+      "transactionId": "{{randomValue type='UUID'}}",
+      "reason": "SLOW_RESPONSE_FOR_TIMEOUT_TESTING"
+    }
+  }
+}

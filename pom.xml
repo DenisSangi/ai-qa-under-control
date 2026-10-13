@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.arcade</groupId>
+    <artifactId>ai-qa-under-control</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>AI QA Under Control</name>
+    <description>System under test for an AI-assisted QA experiment: a small real-money gaming wallet on microservices</description>
+
+    <modules>
+        <module>proto</module>
+        <module>player-service</module>
+        <module>analytics-service</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <grpc.version>1.63.0</grpc.version>
+        <protobuf.version>3.25.3</protobuf.version>
+        <grpc-spring.version>3.1.0.RELEASE</grpc-spring.version>
+        <rest-assured.version>5.4.0</rest-assured.version>
+        <!-- JUnit tags: unit tests run always; "it" needs Docker (Testcontainers),
+             "e2e" needs the docker-compose environment up, "ui" needs a browser -->
+        <test.groups></test.groups>
+        <test.excludedGroups>it,e2e,ui</test.excludedGroups>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <groups>${test.groups}</groups>
+                        <excludedGroups>${test.excludedGroups}</excludedGroups>
+                        <includes>
+                            <!-- default surefire patterns + *IT (Testcontainers classes) -->
+                            <include>**/*Test.java</include>
+                            <include>**/*Tests.java</include>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>it</id>
+            <properties>
+                <test.groups>it</test.groups>
+                <test.excludedGroups>e2e,ui</test.excludedGroups>
+            </properties>
+        </profile>
+        <profile>
+            <id>e2e</id>
+            <properties>
+                <test.groups>e2e</test.groups>
+                <test.excludedGroups>it,ui</test.excludedGroups>
+            </properties>
+        </profile>
+        <profile>
+            <id>ui</id>
+            <properties>
+                <test.groups>ui</test.groups>
+                <test.excludedGroups>it,e2e</test.excludedGroups>
+            </properties>
+        </profile>
+    </profiles>
+</project>

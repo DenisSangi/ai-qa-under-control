@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcade Wallet — system under test</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: -apple-system, "Segoe UI", sans-serif; background: #14161a; color: #e6e6e6; margin: 0; padding: 24px; }
+  h1 { margin-top: 0; }
+  a { color: #7ab7ff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  section { background: #1d2026; border: 1px solid #2c3038; border-radius: 10px; padding: 16px; }
+  h2 { font-size: 15px; margin: 0 0 12px; color: #9fb3c8; text-transform: uppercase; letter-spacing: .06em; }
+  label { display: block; font-size: 12px; color: #8b93a1; margin: 8px 0 2px; }
+  input, select { width: 100%; box-sizing: border-box; background: #12141a; color: #e6e6e6; border: 1px solid #333a45; border-radius: 6px; padding: 8px; }
+  button { margin-top: 12px; width: 100%; background: #2f6feb; color: white; border: 0; border-radius: 6px; padding: 10px; font-weight: 600; cursor: pointer; }
+  button:hover { background: #3b7bf7; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #2c3038; }
+  th { color: #8b93a1; font-size: 12px; text-transform: uppercase; }
+  #log { background: #0d0f12; border: 1px solid #2c3038; border-radius: 10px; padding: 12px; font-size: 12px; max-height: 260px; overflow: auto; white-space: pre-wrap; }
+  .ok { color: #62d98a; } .err { color: #ff7676; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: #2c3038; }
+  .badge.live { background: #1d4428; color: #62d98a; }
+</style>
+</head>
+<body>
+<h1>🎰 Arcade Wallet</h1>
+<p>
+  <a href="/swagger-ui/index.html">Swagger UI</a> ·
+  <a href="/actuator/health">Health</a> ·
+  <a href="/actuator/prometheus">Metrics</a> ·
+  WebSocket: <span id="ws-status" class="badge">connecting…</span>
+</p>
+
+<div class="grid">
+  <section>
+    <h2>Create player</h2>
+    <form id="create-form">
+      <label>Username</label><input name="username" required minlength="3" placeholder="lucky_luke">
+      <label>Email</label><input name="email" type="text" required placeholder="luke@example.com">
+      <label>Country (2 letters)</label><input name="country" required maxlength="2" placeholder="DE">
+      <button type="submit">POST /api/players</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Deposit</h2>
+    <form id="deposit-form">
+      <label>Player ID</label><input name="playerId" type="number" required>
+      <label>Amount (&gt;10000 → declined by payment stub)</label><input name="amount" type="number" step="0.01" value="100" required>
+      <button type="submit">POST /api/players/{id}/deposit</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Play a round</h2>
+    <form id="play-form">
+      <label>Player ID</label><input name="playerId" type="number" required>
+      <label>Game</label>
+      <select name="game">
+        <option>slots</option><option>roulette</option><option>blackjack</option><option>poker</option><option>crash</option>
+      </select>
+      <label>Bet</label><input name="bet" type="number" step="0.01" value="10" required>
+      <button type="submit">Spin! (start + finish with random win)</button>
+    </form>
+  </section>
+</div>
+
+<section>
+  <h2>Leaderboard <span id="lb-source" class="badge">rest</span></h2>
+  <table id="leaderboard">
+    <thead><tr><th>#</th><th>Player</th><th>Total win</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<h2 style="margin-top:24px">Request log</h2>
+<pre id="log"></pre>
+
+<script>
+  const log = (msg, cls) => {
+    const el = document.getElementById('log');
+    const line = document.createElement('span');
+    line.className = cls || '';
+    line.textContent = `[${new Date().toISOString()}] ${msg}\n`;
+    el.prepend(line);
+  };
+
+  async function api(method, url, body) {
+    const res = await fetch(url, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    log(`${method} ${url} -> ${res.status} ${text}`, res.ok ? 'ok' : 'err');
+    if (!res.ok) throw new Error(`${res.status}`);
+    return data;
+  }
+
+  function renderLeaderboard(top, source) {
+    const tbody = document.querySelector('#leaderboard tbody');
+    tbody.innerHTML = '';
+    top.forEach((e, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i + 1}</td><td>${e.username} (id ${e.playerId})</td><td>${e.totalWin}</td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('lb-source').textContent = source;
+  }
+
+  async function loadLeaderboard() {
+    const top = await api('GET', '/api/leaderboard');
+    renderLeaderboard(top, 'rest');
+  }
+
+  // --- WebSocket live updates ---
+  const wsStatus = document.getElementById('ws-status');
+  const ws = new WebSocket(`ws://${location.host}/ws/leaderboard`);
+  ws.onopen = () => { wsStatus.textContent = 'live'; wsStatus.className = 'badge live'; };
+  ws.onclose = () => { wsStatus.textContent = 'disconnected'; wsStatus.className = 'badge'; };
+  ws.onmessage = (e) => {
+    log(`WS <- ${e.data}`, 'ok');
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'LEADERBOARD_UPDATED') renderLeaderboard(msg.top, 'websocket');
+  };
+
+  // --- forms ---
+  const formData = (f) => Object.fromEntries(new FormData(f).entries());
+
+  document.getElementById('create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = formData(e.target);
+    try { await api('POST', '/api/players', d); } catch {}
+  });
+
+  document.getElementById('deposit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = formData(e.target);
+    try { await api('POST', `/api/players/${d.playerId}/deposit`, { amount: Number(d.amount) }); } catch {}
+  });
+
+  document.getElementById('play-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = formData(e.target);
+    try {
+      const session = await api('POST', '/api/sessions', { playerId: Number(d.playerId), game: d.game, bet: Number(d.bet) });
+      const multiplier = [0, 0, 0.5, 1, 2, 5][Math.floor(Math.random() * 6)];
+      const win = Math.round(Number(d.bet) * multiplier * 100) / 100;
+      await api('POST', `/api/sessions/${session.id}/finish`, { win });
+    } catch {}
+  });
+
+  loadLeaderboard().catch(() => log('initial leaderboard load failed', 'err'));
+</script>
+</body>
+</html>
