@@ -59,7 +59,7 @@ class GameServiceTest {
     @Test
     void startSession_rejectsWhenBalanceIsLowerThanBet() {
         player.setBalance(new BigDecimal("50.00"));
-        when(players.findById(1L)).thenReturn(Optional.of(player));
+        when(players.findByIdForUpdate(1L)).thenReturn(Optional.of(player));
 
         assertThatThrownBy(() -> service.start(new StartSessionRequest(1L, "slots", new BigDecimal("100.00"))))
                 .isInstanceOfSatisfying(BusinessException.class,
@@ -71,7 +71,7 @@ class GameServiceTest {
     @Test
     void startSession_deductsBetFromBalance() {
         player.setBalance(new BigDecimal("100.00"));
-        when(players.findById(1L)).thenReturn(Optional.of(player));
+        when(players.findByIdForUpdate(1L)).thenReturn(Optional.of(player));
 
         SessionDto dto = service.start(new StartSessionRequest(1L, "slots", new BigDecimal("40.00")));
 
@@ -84,7 +84,7 @@ class GameServiceTest {
     void finishSession_rejectsWhenSessionIsNotActive() {
         GameSession session = new GameSession(player, "slots", new BigDecimal("10.00"));
         session.setStatus(SessionStatus.FINISHED);
-        when(sessions.findById(7L)).thenReturn(Optional.of(session));
+        when(sessions.findByIdForUpdate(7L)).thenReturn(Optional.of(session));
 
         assertThatThrownBy(() -> service.finish(7L, new BigDecimal("5.00")))
                 .isInstanceOfSatisfying(BusinessException.class,
@@ -95,7 +95,8 @@ class GameServiceTest {
     void finishSession_addsWinPublishesEventAndInvalidatesCache() {
         player.setBalance(new BigDecimal("60.00"));
         GameSession session = new GameSession(player, "roulette", new BigDecimal("40.00"));
-        when(sessions.findById(7L)).thenReturn(Optional.of(session));
+        when(sessions.findByIdForUpdate(7L)).thenReturn(Optional.of(session));
+        when(players.findByIdForUpdate(1L)).thenReturn(Optional.of(player));
 
         SessionDto dto = service.finish(7L, new BigDecimal("90.00"));
 

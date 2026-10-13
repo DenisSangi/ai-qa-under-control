@@ -55,6 +55,15 @@
   </section>
 
   <section>
+    <h2>Withdraw</h2>
+    <form id="withdraw-form">
+      <label>Player ID</label><input name="playerId" type="number" required>
+      <label>Amount (&gt;5000 → declined by payout stub)</label><input name="amount" type="number" step="0.01" value="50" required>
+      <button type="submit">POST /api/players/{id}/withdraw</button>
+    </form>
+  </section>
+
+  <section>
     <h2>Play a round</h2>
     <form id="play-form">
       <label>Player ID</label><input name="playerId" type="number" required>
@@ -88,10 +97,11 @@
     el.prepend(line);
   };
 
-  async function api(method, url, body) {
+  async function api(method, url, body, extraHeaders) {
+    const headers = { ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders };
     const res = await fetch(url, {
       method,
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      headers,
       body: body ? JSON.stringify(body) : undefined
     });
     const text = await res.text();
@@ -140,7 +150,20 @@
   document.getElementById('deposit-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = formData(e.target);
-    try { await api('POST', `/api/players/${d.playerId}/deposit`, { amount: Number(d.amount) }); } catch {}
+    // A fresh key per submit: each click is a new deposit, not a retry.
+    try {
+      await api('POST', `/api/players/${d.playerId}/deposit`, { amount: Number(d.amount) },
+          { 'Idempotency-Key': crypto.randomUUID() });
+    } catch {}
+  });
+
+  document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = formData(e.target);
+    try {
+      await api('POST', `/api/players/${d.playerId}/withdraw`, { amount: Number(d.amount) },
+          { 'Idempotency-Key': crypto.randomUUID() });
+    } catch {}
   });
 
   document.getElementById('play-form').addEventListener('submit', async (e) => {

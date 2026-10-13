@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -100,8 +102,10 @@ class PlayerFlowIT {
         Number playerId = (Number) created.getBody().get("id");
 
         // 2. deposit through the stubbed payment provider
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Idempotency-Key", UUID.randomUUID().toString());
         ResponseEntity<Map> deposited = rest.postForEntity("/api/players/" + playerId + "/deposit",
-                Map.of("amount", 100), Map.class);
+                new HttpEntity<>(Map.of("amount", 100), headers), Map.class);
         assertThat(deposited.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(Double.parseDouble(deposited.getBody().get("balance").toString())).isEqualTo(100.0);
 

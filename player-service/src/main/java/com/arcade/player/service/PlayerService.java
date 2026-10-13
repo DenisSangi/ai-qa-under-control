@@ -26,15 +26,21 @@ public class PlayerService {
     private final TransactionRepository transactions;
     private final PaymentClient payment;
     private final EventPublisher events;
+    private final DepositLimitService depositLimits;
+    private final IdempotencyService idempotency;
 
     public PlayerService(PlayerRepository players,
                          TransactionRepository transactions,
                          PaymentClient payment,
-                         EventPublisher events) {
+                         EventPublisher events,
+                         DepositLimitService depositLimits,
+                         IdempotencyService idempotency) {
         this.players = players;
         this.transactions = transactions;
         this.payment = payment;
         this.events = events;
+        this.depositLimits = depositLimits;
+        this.idempotency = idempotency;
     }
 
     @Transactional
@@ -62,16 +68,41 @@ public class PlayerService {
         return country == null ? players.findAll(pageable) : players.findByCountry(country, pageable);
     }
 
+    /** The idempotency key must already be claimed by IdempotencyService. */
     @Transactional
-    public Player deposit(Long id, BigDecimal amount) {
-        Player player = get(id);
+    public Player deposit(Long id, BigDecimal amount, String idempotencyKey) {
+        Player player = lock(id);
+        depositLimits.check(id, amount);
         // NOTE: calling an external provider inside a DB transaction is a known
         // anti-pattern (see docs/theory/12-microservices-e2e.md) — kept simple on purpose.
         payment.charge(id, amount);
         player.setBalance(player.getBalance().add(amount));
         transactions.save(new PaymentTransaction(id, TxType.DEPOSIT, amount));
+        idempotency.complete(id, idempotencyKey, player);
         events.publishPlayerEvent(new PlayerEvent(
                 UUID.randomUUID().toString(), "DEPOSIT", id, amount, Instant.now().toString()));
         return player;
+    }
+
+    /** The idempotency key must already be claimed by IdempotencyService. */
+    @Transactional
+    public Player withdraw(Long id, BigDecimal amount, String idempotencyKey) {
+        Player player = lock(id);
+        if (player.getBalance().compareTo(amount) < 0) {
+            throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
+                    "balance " + player.getBalance() + " is lower than withdrawal " + amount);
+        }
+        payment.payout(id, amount);
+        player.setBalance(player.getBalance().subtract(amount));
+        transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount));
+        idempotency.complete(id, idempotencyKey, player);
+        events.publishPlayerEvent(new PlayerEvent(
+                UUID.randomUUID().toString(), "WITHDRAWAL", id, amount, Instant.now().toString()));
+        return player;
+    }
+
+    private Player lock(Long id) {
+        return players.findByIdForUpdate(id)
+                .orElseThrow(() -> new NotFoundException("player " + id + " not found"));
     }
 }

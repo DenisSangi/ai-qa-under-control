@@ -45,3 +45,6 @@ management:
 
 app:
   leaderboard-cache-ttl-seconds: 30
+  deposit-limit:
+    # Delay before a limit increase or removal takes effect. Shorten for tests, e.g. PT10S.
+    cooling-off: PT24H

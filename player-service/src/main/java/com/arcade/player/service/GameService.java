@@ -57,7 +57,7 @@ public class GameService {
 
     @Transactional
     public SessionDto start(StartSessionRequest request) {
-        Player player = players.findById(request.playerId())
+        Player player = players.findByIdForUpdate(request.playerId())
                 .orElseThrow(() -> new NotFoundException("player " + request.playerId() + " not found"));
         if (player.getBalance().compareTo(request.bet()) < 0) {
             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
@@ -71,13 +71,15 @@ public class GameService {
 
     @Transactional
     public SessionDto finish(Long sessionId, BigDecimal win) {
-        GameSession session = sessions.findById(sessionId)
+        // Lock order: session, then player. Nothing locks a player and then a session, so no deadlock.
+        GameSession session = sessions.findByIdForUpdate(sessionId)
                 .orElseThrow(() -> new NotFoundException("session " + sessionId + " not found"));
         if (session.getStatus() != SessionStatus.ACTIVE) {
             throw new BusinessException("SESSION_NOT_ACTIVE", HttpStatus.CONFLICT,
                     "session " + sessionId + " is " + session.getStatus() + ", only ACTIVE sessions can be finished");
         }
-        Player player = session.getPlayer();
+        Player player = players.findByIdForUpdate(session.getPlayer().getId())
+                .orElseThrow(() -> new IllegalStateException("session " + sessionId + " has no player"));
         player.setBalance(player.getBalance().add(win));
         session.setWinAmount(win);
         session.setStatus(SessionStatus.FINISHED);

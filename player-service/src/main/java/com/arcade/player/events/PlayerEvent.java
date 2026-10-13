@@ -3,7 +3,7 @@ package com.arcade.player.events;
 import java.math.BigDecimal;
 
 /**
- * Published to the "player-events" topic. type: REGISTERED | DEPOSIT.
+ * Published to the "player-events" topic. type: REGISTERED | DEPOSIT | WITHDRAWAL.
  */
 public record PlayerEvent(
         String eventId,

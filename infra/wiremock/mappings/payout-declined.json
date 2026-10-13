@@ -1,0 +1,19 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/payouts",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$[?(@.amount > 5000)]" }
+    ]
+  },
+  "response": {
+    "status": 402,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "status": "DECLINED",
+      "transactionId": null,
+      "reason": "LIMIT_EXCEEDED"
+    }
+  }
+}
