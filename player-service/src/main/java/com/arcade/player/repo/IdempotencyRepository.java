@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 
 public interface IdempotencyRepository extends JpaRepository<IdempotencyRecord, Long> {
@@ -19,14 +20,15 @@ public interface IdempotencyRepository extends JpaRepository<IdempotencyRecord, 
     @Modifying
     @Transactional
     @Query(value = """
-            insert into idempotency_keys (player_id, idempotency_key, operation, amount, status)
-            values (:playerId, :key, :operation, :amount, 'IN_PROGRESS')
+            insert into idempotency_keys (player_id, idempotency_key, operation, amount, status, created_at)
+            values (:playerId, :key, :operation, :amount, 'IN_PROGRESS', :createdAt)
             on conflict (player_id, idempotency_key) do nothing
             """, nativeQuery = true)
     int tryInsert(@Param("playerId") Long playerId,
                   @Param("key") String key,
                   @Param("operation") String operation,
-                  @Param("amount") BigDecimal amount);
+                  @Param("amount") BigDecimal amount,
+                  @Param("createdAt") Instant createdAt);
 
     Optional<IdempotencyRecord> findByPlayerIdAndKey(Long playerId, String key);
 

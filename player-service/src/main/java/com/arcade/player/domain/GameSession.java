@@ -41,7 +41,7 @@ public class GameSession {
     private SessionStatus status = SessionStatus.ACTIVE;
 
     @Column(name = "started_at", nullable = false)
-    private Instant startedAt = Instant.now();
+    private Instant startedAt;
 
     @Column(name = "finished_at")
     private Instant finishedAt;
@@ -49,10 +49,11 @@ public class GameSession {
     protected GameSession() {
     }
 
-    public GameSession(Player player, String game, BigDecimal betAmount) {
+    public GameSession(Player player, String game, BigDecimal betAmount, Instant startedAt) {
         this.player = player;
         this.game = game;
         this.betAmount = betAmount;
+        this.startedAt = startedAt;
     }
 
     public Long getId() {

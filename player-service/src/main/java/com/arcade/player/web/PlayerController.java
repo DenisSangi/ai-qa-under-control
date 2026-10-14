@@ -9,6 +9,7 @@ import com.arcade.player.dto.WithdrawRequest;
 import com.arcade.player.service.IdempotencyService;
 import com.arcade.player.service.PlayerService;
 import com.arcade.player.service.StatsClient;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,10 @@ import java.util.function.Supplier;
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
+
+    // The header is validated in code (to answer with our own error codes), so Spring sees it as
+    // optional; this keeps the OpenAPI document honest.
+    private static final String IDEMPOTENCY_KEY_DOC = "Required. 1-64 printable ASCII characters.";
 
     private final PlayerService playerService;
     private final StatsClient statsClient;
@@ -63,6 +68,7 @@ public class PlayerController {
 
     @PostMapping("/{id}/deposit")
     public ResponseEntity<?> deposit(@PathVariable Long id,
+                                     @Parameter(required = true, description = IDEMPOTENCY_KEY_DOC)
                                      @RequestHeader(name = IdempotencyService.HEADER, required = false) String key,
                                      @Valid @RequestBody DepositRequest request) {
         return idempotent(id, key, TxType.DEPOSIT, request.amount(),
@@ -71,6 +77,7 @@ public class PlayerController {
 
     @PostMapping("/{id}/withdraw")
     public ResponseEntity<?> withdraw(@PathVariable Long id,
+                                      @Parameter(required = true, description = IDEMPOTENCY_KEY_DOC)
                                       @RequestHeader(name = IdempotencyService.HEADER, required = false) String key,
                                       @Valid @RequestBody WithdrawRequest request) {
         return idempotent(id, key, TxType.WITHDRAWAL, request.amount(),

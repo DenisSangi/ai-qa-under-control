@@ -34,15 +34,16 @@ public class Player {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     protected Player() {
     }
 
-    public Player(String username, String email, String country) {
+    public Player(String username, String email, String country, Instant createdAt) {
         this.username = username;
         this.email = email;
         this.country = country;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {

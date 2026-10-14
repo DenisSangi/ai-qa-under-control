@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.Clock;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,6 +38,7 @@ public class GameService {
     private final LeaderboardService leaderboard;
     private final LeaderboardWebSocketHandler ws;
     private final ObjectMapper mapper;
+    private final Clock clock;
 
     public GameService(PlayerRepository players,
                        GameSessionRepository sessions,
@@ -45,7 +46,8 @@ public class GameService {
                        EventPublisher events,
                        LeaderboardService leaderboard,
                        LeaderboardWebSocketHandler ws,
-                       ObjectMapper mapper) {
+                       ObjectMapper mapper,
+                       Clock clock) {
         this.players = players;
         this.sessions = sessions;
         this.transactions = transactions;
@@ -53,6 +55,7 @@ public class GameService {
         this.leaderboard = leaderboard;
         this.ws = ws;
         this.mapper = mapper;
+        this.clock = clock;
     }
 
     @Transactional
@@ -64,8 +67,8 @@ public class GameService {
                     "balance " + player.getBalance() + " is lower than bet " + request.bet());
         }
         player.setBalance(player.getBalance().subtract(request.bet()));
-        GameSession session = sessions.save(new GameSession(player, request.game(), request.bet()));
-        transactions.save(new PaymentTransaction(player.getId(), TxType.BET, request.bet()));
+        GameSession session = sessions.save(new GameSession(player, request.game(), request.bet(), clock.instant()));
+        transactions.save(new PaymentTransaction(player.getId(), TxType.BET, request.bet(), clock.instant()));
         return SessionDto.from(session);
     }
 
@@ -83,13 +86,13 @@ public class GameService {
         player.setBalance(player.getBalance().add(win));
         session.setWinAmount(win);
         session.setStatus(SessionStatus.FINISHED);
-        session.setFinishedAt(Instant.now());
+        session.setFinishedAt(clock.instant());
         if (win.signum() > 0) {
-            transactions.save(new PaymentTransaction(player.getId(), TxType.WIN, win));
+            transactions.save(new PaymentTransaction(player.getId(), TxType.WIN, win, clock.instant()));
         }
         events.publishGameFinished(new GameFinishedEvent(
                 UUID.randomUUID().toString(), sessionId, player.getId(), session.getGame(),
-                session.getBetAmount(), win, Instant.now().toString()));
+                session.getBetAmount(), win, clock.instant().toString()));
         leaderboard.invalidate();
         broadcastLeaderboard();
         return SessionDto.from(session);

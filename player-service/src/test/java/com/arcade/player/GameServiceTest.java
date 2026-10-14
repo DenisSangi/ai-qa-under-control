@@ -21,6 +21,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,14 +47,16 @@ class GameServiceTest {
     private final LeaderboardService leaderboard = mock(LeaderboardService.class);
     private final LeaderboardWebSocketHandler ws = mock(LeaderboardWebSocketHandler.class);
 
+    private final Clock clock = Clock.fixed(Instant.parse("2026-01-01T12:00:00Z"), ZoneOffset.UTC);
+
     private final GameService service = new GameService(
-            players, sessions, transactions, events, leaderboard, ws, new ObjectMapper());
+            players, sessions, transactions, events, leaderboard, ws, new ObjectMapper(), clock);
 
     private Player player;
 
     @BeforeEach
     void setUp() {
-        player = new Player("tester", "tester@example.com", "DE");
+        player = new Player("tester", "tester@example.com", "DE", clock.instant());
         ReflectionTestUtils.setField(player, "id", 1L);
         when(sessions.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
@@ -82,7 +87,7 @@ class GameServiceTest {
 
     @Test
     void finishSession_rejectsWhenSessionIsNotActive() {
-        GameSession session = new GameSession(player, "slots", new BigDecimal("10.00"));
+        GameSession session = new GameSession(player, "slots", new BigDecimal("10.00"), clock.instant());
         session.setStatus(SessionStatus.FINISHED);
         when(sessions.findByIdForUpdate(7L)).thenReturn(Optional.of(session));
 
@@ -94,7 +99,7 @@ class GameServiceTest {
     @Test
     void finishSession_addsWinPublishesEventAndInvalidatesCache() {
         player.setBalance(new BigDecimal("60.00"));
-        GameSession session = new GameSession(player, "roulette", new BigDecimal("40.00"));
+        GameSession session = new GameSession(player, "roulette", new BigDecimal("40.00"), clock.instant());
         when(sessions.findByIdForUpdate(7L)).thenReturn(Optional.of(session));
         when(players.findByIdForUpdate(1L)).thenReturn(Optional.of(player));
 

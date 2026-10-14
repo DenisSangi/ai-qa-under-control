@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -31,10 +32,12 @@ public class IdempotencyService {
 
     private final IdempotencyRepository records;
     private final ObjectMapper mapper;
+    private final Clock clock;
 
-    public IdempotencyService(IdempotencyRepository records, ObjectMapper mapper) {
+    public IdempotencyService(IdempotencyRepository records, ObjectMapper mapper, Clock clock) {
         this.records = records;
         this.mapper = mapper;
+        this.clock = clock;
     }
 
     public void validate(String key) {
@@ -56,7 +59,7 @@ public class IdempotencyService {
         // Two attempts: the key may disappear between the failed insert and the lookup
         // when its owner fails and releases it.
         for (int attempt = 0; attempt < 2; attempt++) {
-            if (records.tryInsert(playerId, key, operation.name(), amount) == 1) {
+            if (records.tryInsert(playerId, key, operation.name(), amount, clock.instant()) == 1) {
                 return Optional.empty();
             }
             Optional<IdempotencyRecord> existing = records.findByPlayerIdAndKey(playerId, key);

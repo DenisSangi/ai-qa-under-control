@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.Clock;
 import java.util.UUID;
 
 @Service
@@ -28,19 +28,22 @@ public class PlayerService {
     private final EventPublisher events;
     private final DepositLimitService depositLimits;
     private final IdempotencyService idempotency;
+    private final Clock clock;
 
     public PlayerService(PlayerRepository players,
                          TransactionRepository transactions,
                          PaymentClient payment,
                          EventPublisher events,
                          DepositLimitService depositLimits,
-                         IdempotencyService idempotency) {
+                         IdempotencyService idempotency,
+                         Clock clock) {
         this.players = players;
         this.transactions = transactions;
         this.payment = payment;
         this.events = events;
         this.depositLimits = depositLimits;
         this.idempotency = idempotency;
+        this.clock = clock;
     }
 
     @Transactional
@@ -53,9 +56,10 @@ public class PlayerService {
             throw new BusinessException("DUPLICATE_EMAIL", HttpStatus.CONFLICT,
                     "email '" + request.email() + "' is already registered");
         }
-        Player player = players.save(new Player(request.username(), request.email(), request.country().toUpperCase()));
+        Player player = players.save(new Player(request.username(), request.email(), request.country().toUpperCase(),
+                clock.instant()));
         events.publishPlayerEvent(new PlayerEvent(
-                UUID.randomUUID().toString(), "REGISTERED", player.getId(), null, Instant.now().toString()));
+                UUID.randomUUID().toString(), "REGISTERED", player.getId(), null, clock.instant().toString()));
         return player;
     }
 
@@ -77,10 +81,10 @@ public class PlayerService {
         // anti-pattern (see docs/theory/12-microservices-e2e.md) — kept simple on purpose.
         payment.charge(id, amount);
         player.setBalance(player.getBalance().add(amount));
-        transactions.save(new PaymentTransaction(id, TxType.DEPOSIT, amount));
+        transactions.save(new PaymentTransaction(id, TxType.DEPOSIT, amount, clock.instant()));
         idempotency.complete(id, idempotencyKey, player);
         events.publishPlayerEvent(new PlayerEvent(
-                UUID.randomUUID().toString(), "DEPOSIT", id, amount, Instant.now().toString()));
+                UUID.randomUUID().toString(), "DEPOSIT", id, amount, clock.instant().toString()));
         return player;
     }
 
@@ -94,10 +98,10 @@ public class PlayerService {
         }
         payment.payout(id, amount);
         player.setBalance(player.getBalance().subtract(amount));
-        transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount));
+        transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount, clock.instant()));
         idempotency.complete(id, idempotencyKey, player);
         events.publishPlayerEvent(new PlayerEvent(
-                UUID.randomUUID().toString(), "WITHDRAWAL", id, amount, Instant.now().toString()));
+                UUID.randomUUID().toString(), "WITHDRAWAL", id, amount, clock.instant().toString()));
         return player;
     }
 

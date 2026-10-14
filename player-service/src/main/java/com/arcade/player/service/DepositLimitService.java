@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,15 +36,18 @@ public class DepositLimitService {
     private final TransactionRepository transactions;
     private final PlayerRepository players;
     private final Duration coolingOff;
+    private final Clock clock;
 
     public DepositLimitService(DepositLimitRepository limits,
                                TransactionRepository transactions,
                                PlayerRepository players,
-                               @Value("${app.deposit-limit.cooling-off}") Duration coolingOff) {
+                               @Value("${app.deposit-limit.cooling-off}") Duration coolingOff,
+                               Clock clock) {
         this.limits = limits;
         this.transactions = transactions;
         this.players = players;
         this.coolingOff = coolingOff;
+        this.clock = clock;
     }
 
     @Transactional
@@ -51,7 +55,7 @@ public class DepositLimitService {
         if (!players.existsById(playerId)) {
             throw playerNotFound(playerId);
         }
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         return activeLimits(playerId, now).stream().map(limit -> toDto(limit, now)).toList();
     }
 
@@ -59,7 +63,7 @@ public class DepositLimitService {
     @Transactional
     public DepositLimitDto set(Long playerId, DepositLimitPeriod period, BigDecimal amount) {
         lockPlayer(playerId);
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         DepositLimit limit = limits.findByPlayerIdAndPeriod(playerId, period)
                 .orElseGet(() -> limits.save(new DepositLimit(playerId, period)));
         limit.applyDuePendingChange(now);
@@ -75,7 +79,7 @@ public class DepositLimitService {
     @Transactional
     public DepositLimitDto remove(Long playerId, DepositLimitPeriod period) {
         lockPlayer(playerId);
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         DepositLimit limit = limits.findByPlayerIdAndPeriod(playerId, period)
                 .orElseThrow(() -> limitNotFound(playerId, period));
         limit.applyDuePendingChange(now);
@@ -92,7 +96,7 @@ public class DepositLimitService {
      * order is reported.
      */
     public void check(Long playerId, BigDecimal amount) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         for (DepositLimit limit : activeLimits(playerId, now)) {
             BigDecimal used = used(playerId, limit.getPeriod(), now);
             if (used.add(amount).compareTo(limit.getAmount()) > 0) {

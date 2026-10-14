@@ -31,15 +31,16 @@ public class PaymentTransaction {
     private BigDecimal amount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     protected PaymentTransaction() {
     }
 
-    public PaymentTransaction(Long playerId, TxType type, BigDecimal amount) {
+    public PaymentTransaction(Long playerId, TxType type, BigDecimal amount, Instant createdAt) {
         this.playerId = playerId;
         this.type = type;
         this.amount = amount;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
