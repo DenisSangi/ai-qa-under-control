@@ -19,6 +19,7 @@ Record every requirements risk as an open question for discussion and include it
 
 The test plan must provide 100% test coverage of the functions in scope.
 Do not write test cases: the task is limited in time and tokens.
+Save the test plan with the checklist to api-tests/TEST-PLAN.md.
 
 Exit criteria: 100% of the checklist checks are executed, regardless of the test results.
 
@@ -26,11 +27,13 @@ Exit criteria: 100% of the checklist checks are executed, regardless of the test
 Use JUnit 5 and REST Assured. Unit tests and E2E tests are not part of the task, so do not write
 them.
 Add the requirement number to every autotest with @Tag.
-Create a test suite regression.xml inside api-tests/ to group the autotests and run them.
+Create a test suite inside api-tests/ to group the autotests and run them: a class RegressionSuite
+annotated with @Suite (JUnit Platform Suite). mvn -B test in api-tests/ runs this suite, and every
+autotest runs once.
 Use Surefire for the test run report. Save the run results inside api-tests/results/.
 
 3. Run the test suite.
-Write a test report based on the results of the test run.
+Write a test report based on the results of the test run and save it to api-tests/TEST-REPORT.md.
 The report must contain a requirements coverage matrix: "requirement – checklist item that covers
 it – autotest".
 The report must contain a table of the bugs found.
