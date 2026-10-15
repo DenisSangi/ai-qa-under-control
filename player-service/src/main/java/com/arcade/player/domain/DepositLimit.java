@@ -67,6 +67,14 @@ public class DepositLimit {
         return pendingEffectiveAt != null;
     }
 
+    /** {@code newAmount == null} asks about a pending removal. */
+    public boolean isPending(BigDecimal newAmount) {
+        if (!hasPendingChange()) {
+            return false;
+        }
+        return newAmount == null ? pendingAmount == null : pendingAmount != null && pendingAmount.compareTo(newAmount) == 0;
+    }
+
     /** Applies at once and cancels any pending change. */
     public void applyNow(BigDecimal newAmount) {
         amount = newAmount;

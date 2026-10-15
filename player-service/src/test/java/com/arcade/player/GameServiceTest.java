@@ -5,7 +5,7 @@ import com.arcade.player.domain.Player;
 import com.arcade.player.domain.SessionStatus;
 import com.arcade.player.dto.SessionDto;
 import com.arcade.player.dto.StartSessionRequest;
-import com.arcade.player.events.GameFinishedEvent;
+import com.arcade.player.events.SessionFinishedEvent;
 import com.arcade.player.exception.BusinessException;
 import com.arcade.player.repo.GameSessionRepository;
 import com.arcade.player.repo.PlayerRepository;
@@ -13,8 +13,6 @@ import com.arcade.player.repo.TransactionRepository;
 import com.arcade.player.service.EventPublisher;
 import com.arcade.player.service.GameService;
 import com.arcade.player.service.LeaderboardService;
-import com.arcade.player.ws.LeaderboardWebSocketHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -29,6 +28,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -45,12 +45,11 @@ class GameServiceTest {
     private final TransactionRepository transactions = mock(TransactionRepository.class);
     private final EventPublisher events = mock(EventPublisher.class);
     private final LeaderboardService leaderboard = mock(LeaderboardService.class);
-    private final LeaderboardWebSocketHandler ws = mock(LeaderboardWebSocketHandler.class);
 
     private final Clock clock = Clock.fixed(Instant.parse("2026-01-01T12:00:00Z"), ZoneOffset.UTC);
 
     private final GameService service = new GameService(
-            players, sessions, transactions, events, leaderboard, ws, new ObjectMapper(), clock);
+            players, sessions, transactions, events, leaderboard, clock, Duration.ofSeconds(60));
 
     private Player player;
 
@@ -97,7 +96,7 @@ class GameServiceTest {
     }
 
     @Test
-    void finishSession_addsWinPublishesEventAndInvalidatesCache() {
+    void finishSession_addsWinPublishesEventAndRefreshesLeaderboard() {
         player.setBalance(new BigDecimal("60.00"));
         GameSession session = new GameSession(player, "roulette", new BigDecimal("40.00"), clock.instant());
         when(sessions.findByIdForUpdate(7L)).thenReturn(Optional.of(session));
@@ -108,11 +107,13 @@ class GameServiceTest {
         assertThat(player.getBalance()).isEqualByComparingTo("150.00");
         assertThat(dto.status()).isEqualTo("FINISHED");
 
-        ArgumentCaptor<GameFinishedEvent> captor = ArgumentCaptor.forClass(GameFinishedEvent.class);
-        verify(events).publishGameFinished(captor.capture());
-        assertThat(captor.getValue().playerId()).isEqualTo(1L);
-        assertThat(captor.getValue().win()).isEqualByComparingTo("90.00");
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(events).publishSessionEvent(eq(1L), captor.capture());
+        assertThat(captor.getValue()).isInstanceOfSatisfying(SessionFinishedEvent.class, event -> {
+            assertThat(event.type()).isEqualTo("SESSION_FINISHED");
+            assertThat(event.win()).isEqualByComparingTo("90.00");
+        });
 
-        verify(leaderboard).invalidate();
+        verify(leaderboard).refresh();
     }
 }

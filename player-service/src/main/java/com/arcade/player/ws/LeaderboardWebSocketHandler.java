@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Plain (non-STOMP) WebSocket endpoint at /ws/leaderboard.
- * Every finished game session triggers a LEADERBOARD_UPDATED broadcast.
+ * LeaderboardService broadcasts LEADERBOARD_UPDATED here whenever the top changes.
  */
 @Component
 public class LeaderboardWebSocketHandler extends TextWebSocketHandler {

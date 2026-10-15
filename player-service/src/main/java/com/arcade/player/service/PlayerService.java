@@ -75,11 +75,12 @@ public class PlayerService {
     /** The idempotency key must already be claimed by IdempotencyService. */
     @Transactional
     public Player deposit(Long id, BigDecimal amount, String idempotencyKey) {
+        AmountRange.DEPOSIT.check(amount);
         Player player = lock(id);
         depositLimits.check(id, amount);
         // NOTE: calling an external provider inside a DB transaction is a known
         // anti-pattern (see docs/theory/12-microservices-e2e.md) — kept simple on purpose.
-        payment.charge(id, amount);
+        payment.charge(id, amount, IdempotencyService.reference(id, idempotencyKey));
         player.setBalance(player.getBalance().add(amount));
         transactions.save(new PaymentTransaction(id, TxType.DEPOSIT, amount, clock.instant()));
         idempotency.complete(id, idempotencyKey, player);
@@ -91,12 +92,13 @@ public class PlayerService {
     /** The idempotency key must already be claimed by IdempotencyService. */
     @Transactional
     public Player withdraw(Long id, BigDecimal amount, String idempotencyKey) {
+        AmountRange.WITHDRAWAL.check(amount);
         Player player = lock(id);
         if (player.getBalance().compareTo(amount) < 0) {
             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
                     "balance " + player.getBalance() + " is lower than withdrawal " + amount);
         }
-        payment.payout(id, amount);
+        payment.payout(id, amount, IdempotencyService.reference(id, idempotencyKey));
         player.setBalance(player.getBalance().subtract(amount));
         transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount, clock.instant()));
         idempotency.complete(id, idempotencyKey, player);

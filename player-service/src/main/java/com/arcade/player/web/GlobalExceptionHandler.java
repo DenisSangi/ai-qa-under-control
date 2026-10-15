@@ -3,6 +3,7 @@ package com.arcade.player.web;
 import com.arcade.player.dto.ApiError;
 import com.arcade.player.exception.BusinessException;
 import com.arcade.player.exception.NotFoundException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Clock;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Single place that shapes all error responses — a stable error contract is
@@ -55,9 +57,21 @@ public class GlobalExceptionHandler {
         return error("VALIDATION_ERROR", "request validation failed", details);
     }
 
+    /**
+     * A field of the wrong JSON type (for example a number sent as a string, see JacksonConfig) is a
+     * validation error of that field; anything else unreadable is malformed JSON.
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError malformed(HttpMessageNotReadableException e) {
+        if (e.getCause() instanceof MismatchedInputException mismatch && !mismatch.getPath().isEmpty()) {
+            String field = mismatch.getPath().stream()
+                    .map(ref -> ref.getFieldName() != null ? ref.getFieldName() : String.valueOf(ref.getIndex()))
+                    .collect(Collectors.joining("."));
+            Class<?> target = mismatch.getTargetType();
+            String reason = target != null && Number.class.isAssignableFrom(target) ? "must be a number" : "has a wrong type";
+            return error("VALIDATION_ERROR", "request validation failed", Map.of(field, reason));
+        }
         return error("MALFORMED_JSON", "request body is not readable");
     }
 

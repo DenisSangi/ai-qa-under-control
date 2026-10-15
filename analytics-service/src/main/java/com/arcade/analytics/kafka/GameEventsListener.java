@@ -32,6 +32,10 @@ public class GameEventsListener {
             log.error("skipping malformed game event: {}", payload);
             return;
         }
+        // game-events also carries SESSION_STARTED and SESSION_EXPIRED; statistics count finished sessions only.
+        if (!"SESSION_FINISHED".equals(event.type())) {
+            return;
+        }
         log.info("consumed game event {} for player {}", event.eventId(), event.playerId());
         stats.apply(event);
     }

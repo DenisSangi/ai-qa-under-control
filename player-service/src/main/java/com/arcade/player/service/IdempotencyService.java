@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -67,12 +69,13 @@ public class IdempotencyService {
                 continue;
             }
             IdempotencyRecord record = existing.get();
+            // A key in progress is busy whatever the request: its fingerprint matters only once consumed.
+            if (record.getStatus() == IdempotencyRecord.Status.IN_PROGRESS) {
+                throw inProgress(key);
+            }
             if (!record.matches(operation, amount)) {
                 throw new BusinessException("IDEMPOTENCY_KEY_REUSED", HttpStatus.UNPROCESSABLE_ENTITY,
                         HEADER + " '" + key + "' was already used for a different request");
-            }
-            if (record.getStatus() == IdempotencyRecord.Status.IN_PROGRESS) {
-                throw inProgress(key);
             }
             return Optional.of(record.getResponseBody());
         }
@@ -92,6 +95,14 @@ public class IdempotencyService {
 
     public void release(Long playerId, String key) {
         records.deleteByPlayerIdAndKey(playerId, key);
+    }
+
+    /**
+     * Operation reference for the payment provider. Derived from the player and the key, not stored,
+     * so a retry with a released key sends the same reference and different players never share one.
+     */
+    public static String reference(Long playerId, String key) {
+        return UUID.nameUUIDFromBytes((playerId + ":" + key).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     private static BusinessException inProgress(String key) {

@@ -124,7 +124,7 @@ class PlayerFlowIT {
         ResponseEntity<Map> player = rest.getForEntity("/api/players/" + playerId, Map.class);
         assertThat(Double.parseDouble(player.getBody().get("balance").toString())).isEqualTo(120.0);
 
-        // 5. the game-events topic must contain our event
+        // 5. the game-events topic must contain the finish event of our session
         List<String> seen = new CopyOnWriteArrayList<>();
         try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProps())) {
             consumer.subscribe(List.of("game-events"));
@@ -132,7 +132,8 @@ class PlayerFlowIT {
                 for (ConsumerRecord<String, String> r : consumer.poll(Duration.ofMillis(500))) {
                     seen.add(r.value());
                 }
-                assertThat(seen).anyMatch(v -> v.contains("\"sessionId\":" + sessionId));
+                assertThat(seen).anyMatch(v -> v.contains("\"type\":\"SESSION_FINISHED\"")
+                        && v.contains("\"sessionId\":" + sessionId));
             });
         }
     }

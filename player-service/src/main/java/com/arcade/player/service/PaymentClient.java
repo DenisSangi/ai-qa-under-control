@@ -25,28 +25,29 @@ public class PaymentClient {
         this.restClient = builder.baseUrl(baseUrl).build();
     }
 
-    public record PaymentRequest(Long playerId, BigDecimal amount) {
+    /** {@code reference} identifies the operation: a retry of one operation sends the same value. */
+    public record PaymentRequest(Long playerId, BigDecimal amount, String reference) {
     }
 
     public record PaymentResponse(String status, String transactionId, String reason) {
     }
 
     /** Takes money from the player's payment method (deposit). */
-    public String charge(Long playerId, BigDecimal amount) {
-        return send("/payments", "payment", "PAYMENT_DECLINED", playerId, amount);
+    public String charge(Long playerId, BigDecimal amount, String reference) {
+        return send("/payments", "payment", "PAYMENT_DECLINED", new PaymentRequest(playerId, amount, reference));
     }
 
     /** Sends money to the player's payment method (withdrawal). */
-    public String payout(Long playerId, BigDecimal amount) {
-        return send("/payouts", "payout", "PAYOUT_DECLINED", playerId, amount);
+    public String payout(Long playerId, BigDecimal amount, String reference) {
+        return send("/payouts", "payout", "PAYOUT_DECLINED", new PaymentRequest(playerId, amount, reference));
     }
 
-    private String send(String uri, String operation, String declinedCode, Long playerId, BigDecimal amount) {
+    private String send(String uri, String operation, String declinedCode, PaymentRequest request) {
         try {
             PaymentResponse response = restClient.post()
                     .uri(uri)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(new PaymentRequest(playerId, amount))
+                    .body(request)
                     .retrieve()
                     .body(PaymentResponse.class);
             if (response == null || !"APPROVED".equals(response.status())) {

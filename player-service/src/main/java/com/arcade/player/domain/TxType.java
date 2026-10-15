@@ -4,5 +4,6 @@ public enum TxType {
     DEPOSIT,
     WITHDRAWAL,
     BET,
-    WIN
+    WIN,
+    REFUND
 }

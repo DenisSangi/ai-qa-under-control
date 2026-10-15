@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  */
 public record GameFinishedEvent(
         String eventId,
+        String type,
         Long sessionId,
         Long playerId,
         String game,

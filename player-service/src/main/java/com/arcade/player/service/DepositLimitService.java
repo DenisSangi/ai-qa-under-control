@@ -59,23 +59,28 @@ public class DepositLimitService {
         return activeLimits(playerId, now).stream().map(limit -> toDto(limit, now)).toList();
     }
 
-    /** First limit and decreases apply at once; increases wait for the cooling-off period. */
+    /**
+     * First limit and decreases apply at once; increases wait for the cooling-off period. Setting the
+     * current amount cancels a pending change; repeating the pending increase changes nothing.
+     */
     @Transactional
     public DepositLimitDto set(Long playerId, DepositLimitPeriod period, BigDecimal amount) {
         lockPlayer(playerId);
+        AmountRange.DEPOSIT_LIMIT.check(amount);
         Instant now = clock.instant();
+        checkOrder(playerId, period, amount, now);
         DepositLimit limit = limits.findByPlayerIdAndPeriod(playerId, period)
                 .orElseGet(() -> limits.save(new DepositLimit(playerId, period)));
         limit.applyDuePendingChange(now);
         if (!limit.isActive() || amount.compareTo(limit.getAmount()) <= 0) {
             limit.applyNow(amount);
-        } else {
+        } else if (!limit.isPending(amount)) {
             limit.schedule(amount, now.plus(coolingOff));
         }
         return toDto(limit, now);
     }
 
-    /** Removal waits for the cooling-off period, like an increase. */
+    /** Removal waits for the cooling-off period, like an increase; repeating it changes nothing. */
     @Transactional
     public DepositLimitDto remove(Long playerId, DepositLimitPeriod period) {
         lockPlayer(playerId);
@@ -86,28 +91,64 @@ public class DepositLimitService {
         if (!limit.isActive()) {
             throw limitNotFound(playerId, period);
         }
-        limit.schedule(null, now.plus(coolingOff));
+        if (!limit.isPending(null)) {
+            limit.schedule(null, now.plus(coolingOff));
+        }
         return toDto(limit, now);
     }
 
     /**
-     * Runs inside the deposit transaction after the player row is locked. A deposit that
-     * reaches a limit exactly is allowed; the first exceeded limit in DAILY, WEEKLY, MONTHLY
-     * order is reported.
+     * Runs inside the deposit transaction after the player row is locked. The deposit may use what
+     * is left of the most restrictive limit, exactly up to it; on a tie the shortest period is reported.
      */
     public void check(Long playerId, BigDecimal amount) {
         Instant now = clock.instant();
+        DepositLimit restrictive = null;
+        BigDecimal allowed = null;
         for (DepositLimit limit : activeLimits(playerId, now)) {
-            BigDecimal used = used(playerId, limit.getPeriod(), now);
-            if (used.add(amount).compareTo(limit.getAmount()) > 0) {
-                BigDecimal remaining = remaining(limit.getAmount(), used);
-                Map<String, String> details = new LinkedHashMap<>();
-                details.put("period", limit.getPeriod().name());
-                details.put("limit", money(limit.getAmount()).toPlainString());
-                details.put("remaining", remaining.toPlainString());
-                throw new BusinessException("DEPOSIT_LIMIT_EXCEEDED", HttpStatus.UNPROCESSABLE_ENTITY,
-                        "deposit of " + money(amount) + " exceeds the " + limit.getPeriod().name().toLowerCase()
-                                + " deposit limit, remaining " + remaining, details);
+            BigDecimal remaining = remaining(limit.getAmount(), used(playerId, limit.getPeriod(), now));
+            if (allowed == null || remaining.compareTo(allowed) < 0) {
+                restrictive = limit;
+                allowed = remaining;
+            }
+        }
+        if (restrictive != null && amount.compareTo(allowed) > 0) {
+            Map<String, String> details = new LinkedHashMap<>();
+            details.put("period", restrictive.getPeriod().name());
+            details.put("limit", money(restrictive.getAmount()).toPlainString());
+            details.put("remaining", allowed.toPlainString());
+            throw new BusinessException("DEPOSIT_LIMIT_EXCEEDED", HttpStatus.UNPROCESSABLE_ENTITY,
+                    "deposit of " + money(amount) + " exceeds the " + restrictive.getPeriod().name().toLowerCase()
+                            + " deposit limit, remaining " + allowed, details);
+        }
+    }
+
+    /**
+     * Keeps daily <= weekly <= monthly. The new amount is compared with the current and the pending
+     * amount of every other period that has a limit; a pending removal has no amount to compare.
+     */
+    private void checkOrder(Long playerId, DepositLimitPeriod period, BigDecimal amount, Instant now) {
+        for (DepositLimit other : activeLimits(playerId, now)) {
+            if (other.getPeriod() == period) {
+                continue;
+            }
+            boolean longer = other.getPeriod().compareTo(period) > 0;
+            List<BigDecimal> values = new ArrayList<>();
+            values.add(other.getAmount());
+            if (other.getPendingAmount() != null) {
+                values.add(other.getPendingAmount());
+            }
+            for (BigDecimal value : values) {
+                if (longer ? amount.compareTo(value) > 0 : amount.compareTo(value) < 0) {
+                    Map<String, String> details = new LinkedHashMap<>();
+                    details.put("period", period.name());
+                    details.put("conflictingPeriod", other.getPeriod().name());
+                    details.put("conflictingAmount", money(value).toPlainString());
+                    throw new BusinessException("DEPOSIT_LIMIT_ORDER_VIOLATED", HttpStatus.UNPROCESSABLE_ENTITY,
+                            period.name().toLowerCase() + " limit " + money(amount) + " must be "
+                                    + (longer ? "at most" : "at least") + " the " + other.getPeriod().name().toLowerCase()
+                                    + " limit " + money(value), details);
+                }
             }
         }
     }
