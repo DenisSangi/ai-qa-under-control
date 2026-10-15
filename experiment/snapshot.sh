@@ -28,7 +28,7 @@ ALLOW="pom.xml docker-compose.yml run.sh infra/wiremock
 
 # Words that must not reach a generation agent. Branch A must not see the
 # spec's requirement IDs either.
-DENY='experiment|seeded|planted|trainer|playground|under.control|ai.qa|system under test|qa exercise|natural bug|probe|catalog|portfolio|claude|notes/'
+DENY='experiment|seeded|planted|trainer|playground|kept simple|on purpose|anti-pattern|docs/theory|under.control|ai.qa|system under test|qa exercise|natural bug|probe|catalog|portfolio|claude|notes/'
 
 case $BRANCH in
   A) DENY="$DENY|(GEN|DEP|WDR|LIM|SES|LDB)-[0-9]{2}" ;;
