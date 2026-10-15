@@ -430,11 +430,13 @@ WebSocket (LDB-06) no later than 30 seconds after the finish response.
 "top": [...]}`, where `top` has the format of LDB-01.
 - A message is sent if and only if the top differs from the last top sent: other players, another
   order or any other `netResult`.
+- After the service starts, the top at that moment counts as the last top sent; it is not sent.
 - The `top` of a message equals what `GET /api/leaderboard` returns at that moment.
 
-**LDB-07. New period.** The start of a new period is a change of the top: `GET /api/leaderboard`
-and the WebSocket reflect it no later than 30 seconds of real time after the service clock passes
-the period boundary — by the passage of time or by advancing the test clock.
+**LDB-07. New period.** At the start of a new period the top is computed for the new period.
+`GET /api/leaderboard` reflects it no later than 30 seconds of real time after the service clock
+passes the period boundary — by the passage of time or by advancing the test clock. If the new top
+differs from the last top sent, the message (LDB-06) is sent within the same 30 seconds.
 
 ## 10. Environment
 
