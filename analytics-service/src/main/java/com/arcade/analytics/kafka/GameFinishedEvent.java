@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 /**
  * Deliberately a COPY of the producer's record, not a shared library:
  * in microservices the JSON on the wire is the contract, and each side owns
- * its own model. Breaking this contract is exactly what contract testing catches.
+ * its own model.
  */
 public record GameFinishedEvent(
         String eventId,

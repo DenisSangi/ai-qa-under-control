@@ -1,4 +1,4 @@
-# AI QA Under Control — system under test.
+# Arcade stand: infrastructure and services.
 #
 #   docker compose up -d                  -> infra only (services run from the host via ./run.sh or the IDE)
 #   docker compose --profile apps up -d   -> infra + both Spring Boot services (mvn package first)

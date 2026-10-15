@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.arcade</groupId>
-        <artifactId>ai-qa-under-control</artifactId>
+        <artifactId>arcade-stand</artifactId>
         <version>1.0.0</version>
     </parent>
 

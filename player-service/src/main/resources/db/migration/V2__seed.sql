@@ -1,6 +1,5 @@
--- Seed data for SQL practice: 200 players, 5000 finished sessions, 3000 transactions.
--- NOTE: transactions are seeded independently from sessions on purpose —
--- reconciliation queries ("do the numbers add up?") are a classic QA exercise.
+-- Seed data: 200 players, 5000 finished sessions, 3000 transactions.
+-- Transactions are generated independently from sessions.
 
 INSERT INTO players (username, email, country, level, balance, created_at)
 SELECT 'seed_player_' || g,

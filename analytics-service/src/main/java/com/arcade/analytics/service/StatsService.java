@@ -19,8 +19,8 @@ public class StatsService {
 
     /**
      * Kafka gives at-least-once delivery, so this may run twice for the same
-     * event — aggregates would then double-count. Idempotency (dedup by
-     * eventId) is left out on purpose: finding this is a QA exercise.
+     * event — aggregates would then double-count. There is no deduplication
+     * by eventId.
      */
     @Transactional
     public void apply(GameFinishedEvent event) {

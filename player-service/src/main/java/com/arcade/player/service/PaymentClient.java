@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.math.BigDecimal;
 
 /**
- * Client of the external payment provider. In this trainer the provider is a
+ * Client of the external payment provider. Locally the provider is a
  * WireMock stub (docker-compose service "wiremock"): payments over 10000 and
  * payouts over 5000 are declined.
  */

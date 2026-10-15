@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Single place that shapes all error responses — a stable error contract is
- * what QA relies on for negative testing.
+ * Single place that shapes all error responses, so clients get one stable
+ * error contract.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

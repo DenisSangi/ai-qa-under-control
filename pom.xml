@@ -12,11 +12,11 @@
     </parent>
 
     <groupId>com.arcade</groupId>
-    <artifactId>ai-qa-under-control</artifactId>
+    <artifactId>arcade-stand</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>AI QA Under Control</name>
-    <description>System under test for an AI-assisted QA experiment: a small real-money gaming wallet on microservices</description>
+    <name>Arcade Stand</name>
+    <description>A small real-money gaming wallet on microservices</description>
 
     <modules>
         <module>proto</module>

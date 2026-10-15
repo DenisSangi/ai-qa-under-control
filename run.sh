@@ -4,7 +4,7 @@
 # Why a script: a running Spring Boot fat jar must NEVER be overwritten by a
 # rebuild. Nested classes are loaded lazily, so a replaced jar makes every
 # not-yet-loaded code path die with NoClassDefFoundError and the HTTP request
-# hangs with no response (see "Troubleshooting" in README.md).
+# hangs with no response.
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -49,7 +49,7 @@ wait_for "analytics-service" http://localhost:8081/actuator/health
 cat <<'EOF'
 
 Ready:
-  playground   http://localhost:8080/
+  ui           http://localhost:8080/
   swagger      http://localhost:8080/swagger-ui/index.html
   kafka ui     http://localhost:8090  (docker compose --profile tools up -d)
 EOF
