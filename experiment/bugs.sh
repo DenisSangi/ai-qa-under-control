@@ -7,7 +7,7 @@
 #   experiment/bugs.sh save <ID>            write the checkout's changes to <bugs dir>/<ID>.patch
 #   experiment/bugs.sh check [ID...]        each patch applies to the base on its own, service code only
 #   experiment/bugs.sh on <ID> [--fresh]    run the base with this one patch applied
-#   experiment/bugs.sh off                  run the base
+#   experiment/bugs.sh off [--fresh]        run the base
 #   experiment/bugs.sh status               which bug is running, and from where
 #   experiment/bugs.sh hash                 write experiment/seeded-bugs.sha256 (commit it before generation)
 #
@@ -20,8 +20,8 @@
 #
 # Services always run from the measurement checkout, rebuilt from scratch, so
 # no class from a previous patch survives. The docker compose infrastructure
-# is shared; --fresh recreates it with empty volumes and is required for a
-# patch that touches a database migration.
+# is shared; --fresh recreates it with empty volumes (Kafka UI stays down) and
+# is required for a patch that touches a database migration.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
@@ -96,6 +96,26 @@ running_from() {
   lsof -p "$pid" 2>/dev/null | grep -o '/.*player-service-1.0.0.jar' | head -1 || echo "pid $pid"
 }
 
+fresh_option() {
+  [ -z "${1:-}" ] || [ "$1" = --fresh ] || die "unknown option: $1"
+  echo "${1:-}"
+}
+
+# Builds and starts the services from the measurement checkout. On an empty
+# Kafka, analytics-service can subscribe before player-service creates
+# game-events: the topic is created with one partition, grows to three, and
+# the consumer keeps partition 0 only. A known stand defect outside the spec,
+# left as is; after a fresh start the services are restarted to get all three.
+start_stand() {
+  if [ -n "$1" ]; then
+    (cd "$ROOT" && docker compose --profile tools down -v && docker compose up -d --wait)
+    "$MEASURE/run.sh"
+    "$MEASURE/run.sh" --no-build
+  else
+    "$MEASURE/run.sh"
+  fi
+}
+
 cmd=${1:-}
 [ $# -gt 0 ] && shift
 
@@ -133,23 +153,20 @@ case $cmd in
   on)
     [ $# -ge 1 ] || die "usage: $0 on <ID> [--fresh]"
     id=$1
-    fresh=${2:-}
-    [ -z "$fresh" ] || [ "$fresh" = --fresh ] || die "unknown option: $fresh"
+    fresh=$(fresh_option "${2:-}")
     kind=$(check_one "$id")
     [ -z "$kind" ] || [ -n "$fresh" ] || die "$id changes a database migration: run with --fresh (recreates the database)"
     reset_checkout
     git -C "$MEASURE" apply "$(patch_file "$id")"
-    if [ -n "$fresh" ]; then
-      (cd "$ROOT" && docker compose down -v && docker compose up -d --wait)
-    fi
-    "$MEASURE/run.sh"
+    start_stand "$fresh"
     echo "$id $(shasum -a 256 "$(patch_file "$id")" | cut -d' ' -f1)" > "$(state_file)"
     echo "bug $id is on"
     ;;
 
   off)
+    fresh=$(fresh_option "${1:-}")
     reset_checkout
-    "$MEASURE/run.sh"
+    start_stand "$fresh"
     echo "no bug is on"
     ;;
 
