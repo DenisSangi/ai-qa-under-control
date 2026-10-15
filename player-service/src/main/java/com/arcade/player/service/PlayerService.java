@@ -78,8 +78,6 @@ public class PlayerService {
         AmountRange.DEPOSIT.check(amount);
         Player player = lock(id);
         depositLimits.check(id, amount);
-        // NOTE: calling an external provider inside a DB transaction is a known
-        // anti-pattern (see docs/theory/12-microservices-e2e.md) — kept simple on purpose.
         payment.charge(id, amount, IdempotencyService.reference(id, idempotencyKey));
         player.setBalance(player.getBalance().add(amount));
         transactions.save(new PaymentTransaction(id, TxType.DEPOSIT, amount, clock.instant()));
