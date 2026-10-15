@@ -72,6 +72,7 @@ disagree, this specification prevails.
 a withdrawal and a deposit limit, `bet`, `win` — has at most 2 decimal places.
 - Refusal: `400 VALIDATION_ERROR`.
 - Bounds: `10.01` accepted; `10.001` refused.
+- Decimal places are counted as written: `10.010` is refused.
 
 **GEN-03. Numbers sent as strings.** The numeric request fields `amount` (deposit, withdrawal,
 deposit limit), `bet`, `win` and `playerId` must be JSON numbers.
@@ -392,11 +393,12 @@ expiry (SES-11) is not observable yet.
   60 s it is refused.
 
 **SES-11. Expiry.** A session not finished before `startedAt` + 60 seconds expires:
-- `status` = `EXPIRED`.
+- `status` = `EXPIRED`; `finishedAt` stays `null`.
 - Balance increases by the bet.
 - Journal: one `REFUND` record with the bet.
 - Event: `SESSION_EXPIRED` in `game-events` with `eventId`, `type`, `sessionId`, `playerId`,
-  `game`, `bet`, `expiredAt`.
+  `game`, `bet`, `expiredAt`. `expiredAt` is the service-clock time at which the expiry took
+  effect, not earlier than `startedAt` + 60 seconds.
 - All of the above is observable through REST, the journal and Kafka no later than 5 seconds of
   real time after the service clock passes `startedAt` + 60 seconds — by the passage of time or by
   advancing the test clock.
