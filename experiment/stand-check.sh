@@ -12,7 +12,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
-BASE=${AQC_BASE:-sut-v1}
+BASE=${AQC_BASE:-sut-v2}
 RUN=${AQC_RUN:-$HOME/services/arcade-wallet}
 API=http://localhost:8080
 ANALYTICS=http://localhost:8081

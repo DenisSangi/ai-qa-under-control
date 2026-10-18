@@ -12,7 +12,7 @@
 #   experiment/bugs.sh hash                 write experiment/seeded-bugs.sha256 (commit it before generation)
 #
 # Environment:
-#   AQC_BASE      base ref (default: sut-v1)
+#   AQC_BASE      base ref (default: sut-v2, the measured base; generation ran on sut-v1)
 #   AQC_BUGS_DIR  catalog and patches (default: notes/bugs, private until the results are out)
 #   AQC_MEASURE   measurement checkout, a git worktree next to the repository
 #                 (default: ../ai-qa-under-control-measure)
@@ -30,7 +30,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
-BASE=${AQC_BASE:-sut-v1}
+BASE=${AQC_BASE:-sut-v2}
 BUGS=${AQC_BUGS_DIR:-$ROOT/notes/bugs}
 MEASURE=${AQC_MEASURE:-$(dirname "$ROOT")/$(basename "$ROOT")-measure}
 RUN=${AQC_RUN:-$HOME/services/arcade-wallet}
@@ -49,7 +49,7 @@ die() { echo "error: $*" >&2; exit 1; }
 
 base_commit() {
   git -C "$ROOT" rev-parse --verify --quiet "$BASE^{commit}" \
-    || die "unknown base ref: $BASE (tag it: git tag sut-v1)"
+    || die "unknown base ref: $BASE (tag it: git tag sut-v2)"
 }
 
 patch_file() {
