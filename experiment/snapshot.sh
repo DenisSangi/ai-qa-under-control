@@ -6,7 +6,8 @@
 #   experiment/snapshot.sh A|B <dest> [ref]
 #
 # Branch A gets the code; branch B also gets docs/spec/. Files come from <ref>
-# (default: the tag sut-v1) through an explicit allowlist, so a file added to
+# (default: the tag sut-v1) through an explicit allowlist (experiment/stand-files,
+# shared with the folder the stand runs from), so a file added to
 # the repository later cannot leak into a snapshot by accident. Developer tests
 # stay out: every test in a measured suite must be the agent's own.
 set -euo pipefail
@@ -21,10 +22,7 @@ BRANCH=$1
 DEST=$2
 REF=${3:-sut-v1}
 
-ALLOW="pom.xml docker-compose.yml run.sh infra/wiremock
-  proto/pom.xml proto/src/main
-  player-service/pom.xml player-service/Dockerfile player-service/src/main
-  analytics-service/pom.xml analytics-service/Dockerfile analytics-service/src/main"
+ALLOW=$(grep -v '^#' "$ROOT/experiment/stand-files")
 
 # Words that must not reach a generation agent. Branch A must not see the
 # spec's requirement IDs either.

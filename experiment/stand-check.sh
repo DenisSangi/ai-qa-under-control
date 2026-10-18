@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Checks that the running stand is in its initial state: the base with no
 # seeded bug, the seed data only, the test clock at zero, empty Kafka topics
-# with all partitions assigned, and the payment-provider stub as defined in its
-# mapping files. Every generation run starts from this state, so the runs of
-# different branches see the same system.
+# with all partitions assigned, the payment-provider stub as defined in its
+# mapping files, and nothing that points a test agent back at this repository.
+# Every generation run starts from this state, so the runs of different
+# branches see the same system.
 #
 #   experiment/bugs.sh off --fresh && experiment/stand-check.sh
 #
@@ -11,7 +12,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
-MEASURE=${AQC_MEASURE:-$(dirname "$ROOT")/$(basename "$ROOT")-measure}
+BASE=${AQC_BASE:-sut-v1}
+RUN=${AQC_RUN:-$HOME/services/arcade-wallet}
 API=http://localhost:8080
 ANALYTICS=http://localhost:8081
 STUB=http://localhost:8089
@@ -34,7 +36,7 @@ http_code() { curl -s -o /dev/null -w '%{http_code}' -m 5 "$1" || true; }
 
 status=$("$ROOT/experiment/bugs.sh" status)
 check "seeded bug" "bug on: none" "$(echo "$status" | grep '^bug on:')"
-check "player-service jar" "$MEASURE/player-service/target/player-service-1.0.0.jar" \
+check "player-service jar" "$RUN/player-service/target/player-service-1.0.0.jar" \
   "$(echo "$status" | sed -n 's/^player-service runs from: //p')"
 check "player-service health" 200 "$(http_code "$API/actuator/health")"
 check "analytics-service health" 200 "$(http_code "$ANALYTICS/actuator/health")"
@@ -62,9 +64,39 @@ check "analytics consumer partitions" "game-events-0, game-events-1, game-events
 # --- payment-provider stub ---------------------------------------------------
 
 check "stub fixed delay" 0 "$(curl -s -m 5 "$STUB/__admin/settings" | python3 -c 'import sys,json;print(json.load(sys.stdin)["settings"].get("fixedDelay", 0))' 2>/dev/null || echo unavailable)"
-check "stub mappings" "$(ls "$ROOT"/infra/wiremock/mappings/*.json | wc -l | tr -d ' ')" \
+check "stub mappings" "$(ls "$RUN"/infra/wiremock/mappings/*.json | wc -l | tr -d ' ')" \
   "$(curl -s -m 5 "$STUB/__admin/mappings" | python3 -c 'import sys,json;print(len(json.load(sys.stdin)["mappings"]))' 2>/dev/null || echo unavailable)"
 check "stub request journal" 0 "$(curl -s -m 5 "$STUB/__admin/requests" | python3 -c 'import sys,json;print(len(json.load(sys.stdin)["requests"]))' 2>/dev/null || echo unavailable)"
+
+# --- isolation ---------------------------------------------------------------
+# A test agent reads the health details, the logs, the processes and docker.
+# None of them may lead to this repository: services and infrastructure run
+# from a copy of the base's stand files with no git, and the services get a
+# clean environment.
+
+pids=$(pgrep -f 'player-service-1.0.0.jar|analytics-service-1.0.0.jar' || true)
+one_line() { sort -u | tr '\n' ' ' | sed 's/ $//'; }
+
+base_copy=$(mktemp -d)
+# shellcheck disable=SC2046  # the file is a word list
+git -C "$ROOT" archive --format=tar "$BASE" -- $(grep -v '^#' "$ROOT/experiment/stand-files") | tar -x -C "$base_copy"
+cp "$ROOT/experiment/snapshot/README.md" "$base_copy/README.md"
+# The stub container creates an empty infra/wiremock/__files when it starts.
+differences=$( (diff -rq -x target -x __files "$base_copy" "$RUN" 2>&1 || true) | sed "s|$base_copy|<base>|g" | head -3 | tr '\n' ';')
+check "run folder vs the stand files of $BASE" identical "${differences:-identical}"
+check "files in the stub's __files" 0 "$(find "$RUN/infra/wiremock/__files" -mindepth 1 2>/dev/null | wc -l | tr -d ' ')"
+rm -rf "$base_copy"
+
+check "service working folders" "$RUN" \
+  "$(for p in $pids; do lsof -a -p "$p" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p'; done | one_line)"
+check "health disk path" "$RUN/." \
+  "$(for url in "$API" "$ANALYTICS"; do curl -s -m 5 "$url/actuator/health" | python3 -c 'import sys,json;print(json.load(sys.stdin)["components"]["diskSpace"]["details"]["path"])' 2>/dev/null || echo unavailable; done | one_line)"
+check "repository or session in service environment" 0 \
+  "$(for p in $pids; do ps eww -o command= -p "$p"; done | grep -oiE 'ai.qa|under.control|claude|IdeaProjects' | wc -l | tr -d ' ')"
+check "compose project folder" "$RUN" \
+  "$(for c in aqc-postgres aqc-kafka aqc-redis aqc-wiremock; do docker inspect -f '{{index .Config.Labels "com.docker.compose.project.working_dir"}}' "$c" 2>/dev/null || echo "$c missing"; done | one_line)"
+check "stub mount" "$RUN/infra/wiremock" \
+  "$(docker inspect -f '{{range .Mounts}}{{.Source}}{{end}}' aqc-wiremock 2>/dev/null || echo missing)"
 
 # --- logs --------------------------------------------------------------------
 

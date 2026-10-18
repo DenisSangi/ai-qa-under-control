@@ -18,3 +18,6 @@ docker compose up -d
 ```
 
 Never rebuild while the services are running from their jars: use `./run.sh`, which stops them first.
+
+The experiment stand (`experiment/bugs.sh`) runs from its own copy, `~/services/arcade-wallet`, with the same
+container names: stop it there (`docker compose down`) before `docker compose up -d` here.

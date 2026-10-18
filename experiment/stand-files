@@ -1,0 +1,15 @@
+# Files of the system under test that leave the repository: a generation
+# snapshot (snapshot.sh) and the folder the measured stand runs from (bugs.sh)
+# are both built from this list. Paths are relative to the repository root.
+pom.xml
+docker-compose.yml
+run.sh
+infra/wiremock
+proto/pom.xml
+proto/src/main
+player-service/pom.xml
+player-service/Dockerfile
+player-service/src/main
+analytics-service/pom.xml
+analytics-service/Dockerfile
+analytics-service/src/main

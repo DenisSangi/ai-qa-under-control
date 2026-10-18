@@ -16,18 +16,25 @@
 #   AQC_BUGS_DIR  catalog and patches (default: notes/bugs, private until the results are out)
 #   AQC_MEASURE   measurement checkout, a git worktree next to the repository
 #                 (default: ../ai-qa-under-control-measure)
+#   AQC_RUN       folder the stand runs from (default: ~/services/arcade-wallet)
 #   APP_TESTCLOCK_ENABLED  test clock of the running stand (default: true)
 #
-# Services always run from the measurement checkout, rebuilt from scratch, so
-# no class from a previous patch survives. The docker compose infrastructure
-# is shared; --fresh recreates it with empty volumes (Kafka UI stays down) and
-# is required for a patch that touches a database migration.
+# The stand runs from AQC_RUN: a copy of the measurement checkout's stand files
+# (experiment/stand-files) with no git. Whatever a test agent sees of the
+# running stand (health details, logs, processes, docker) leads there, not to
+# this repository. Services are rebuilt from scratch on every switch, so no
+# class from a previous patch survives, and start with a clean environment.
+# The docker compose infrastructure runs from the same folder and is shared;
+# --fresh recreates it with empty volumes (Kafka UI stays down) and is required
+# for a patch that touches a database migration.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
 BASE=${AQC_BASE:-sut-v1}
 BUGS=${AQC_BUGS_DIR:-$ROOT/notes/bugs}
 MEASURE=${AQC_MEASURE:-$(dirname "$ROOT")/$(basename "$ROOT")-measure}
+RUN=${AQC_RUN:-$HOME/services/arcade-wallet}
+STAND_FILES=$(grep -v '^#' "$ROOT/experiment/stand-files")
 HASH_FILE="$ROOT/experiment/seeded-bugs.sha256"
 
 # The measured stand is the spec's environment, which includes the test clock.
@@ -101,18 +108,56 @@ fresh_option() {
   echo "${1:-}"
 }
 
-# Builds and starts the services from the measurement checkout. On an empty
-# Kafka, analytics-service can subscribe before player-service creates
-# game-events: the topic is created with one partition, grows to three, and
-# the consumer keeps partition 0 only. A known stand defect outside the spec,
-# left as is; after a fresh start the services are restarted to get all three.
+# Copies the stand files of the measurement checkout, patch included, into the
+# run folder. Files are replaced in place: the stub container mounts
+# infra/wiremock from there, and removing that folder would cut the mount.
+# Build output is dropped, so the services are rebuilt from scratch.
+export_stand() {
+  local tmp
+  case $RUN in /*) ;; *) die "AQC_RUN must be an absolute path: $RUN" ;; esac
+  case "$RUN/" in "$ROOT"/*|"$MEASURE"/*) die "AQC_RUN is inside the repository or its measurement checkout: $RUN" ;; esac
+  case "$ROOT/" in "$RUN"/*) die "AQC_RUN contains the repository: $RUN" ;; esac
+  if [ -e "$RUN" ] && [ -n "$(ls -A "$RUN")" ]; then
+    [ -f "$RUN/run.sh" ] && [ -f "$RUN/docker-compose.yml" ] && [ ! -e "$RUN/.git" ] \
+      || die "$RUN holds something other than a copy of the stand: remove it or set AQC_RUN"
+  fi
+  tmp=$(mktemp -d)
+  # shellcheck disable=SC2086  # STAND_FILES is a word list
+  (cd "$MEASURE" && tar -cf - $STAND_FILES) | tar -xf - -C "$tmp"
+  cp "$ROOT/experiment/snapshot/README.md" "$tmp/README.md"
+  mkdir -p "$RUN"
+  rsync -a --delete "$tmp/" "$RUN/"
+  rm -rf "$tmp"
+}
+
+# Runs run.sh in the run folder with a clean environment, so the services'
+# process environment (PWD, OLDPWD, the caller's variables) names nothing else.
+run_services() {
+  local mvn v
+  local -a vars
+  mvn=$(command -v mvn) || die "mvn is not on PATH"
+  vars=(HOME="$HOME" USER="${USER:-$(id -un)}" LOGNAME="${LOGNAME:-$(id -un)}" LANG=en_US.UTF-8
+        PATH="$(dirname "$mvn"):/usr/bin:/bin:/usr/sbin:/sbin")
+  for v in $(compgen -e | grep -E '^(APP_[A-Z0-9_]+|JAVA_HOME)$'); do vars+=("$v=${!v}"); done
+  (cd "$RUN" && env -i "${vars[@]}" ./run.sh "$@")
+}
+
+# Builds and starts the stand from the run folder. On an empty Kafka,
+# analytics-service can subscribe before player-service creates game-events:
+# the topic is created with one partition, grows to three, and the consumer
+# keeps partition 0 only. A known stand defect outside the spec, left as is;
+# after a fresh start the services are restarted to get all three.
 start_stand() {
+  export_stand
   if [ -n "$1" ]; then
-    (cd "$ROOT" && docker compose --profile tools down -v && docker compose up -d --wait)
-    "$MEASURE/run.sh"
-    "$MEASURE/run.sh" --no-build
+    # Infrastructure started from the repository itself (the developer setup)
+    # holds the same container names.
+    (cd "$ROOT" && docker compose --profile tools down -v)
+    (cd "$RUN" && docker compose --profile tools down -v && docker compose up -d --wait)
+    run_services
+    run_services --no-build
   else
-    "$MEASURE/run.sh"
+    run_services
   fi
 }
 
