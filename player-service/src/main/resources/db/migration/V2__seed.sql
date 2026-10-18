@@ -1,5 +1,7 @@
 -- Seed data: 200 players, 5000 finished sessions, 3000 transactions.
 -- Transactions are generated independently from sessions.
+-- A fixed seed gives the same data on every fresh start; times stay relative to now().
+SELECT setseed(0.42);
 
 INSERT INTO players (username, email, country, level, balance, created_at)
 SELECT 'seed_player_' || g,
