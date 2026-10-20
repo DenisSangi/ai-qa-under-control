@@ -10,8 +10,9 @@ batch, and the calibration score.
 prepare  For each batch: <workdir>/<batch>/ holds the specification and the suite, or the calibration sample in
          place of api-tests/, without the service sources, the generating agent's plan and report, run reports
          or git (decision D9); and <workdir>/<batch>.brief.txt: the common brief, the note on running three
-         checks in one session (D10), the briefs of CHK-1, CHK-3A and CHK-5 verbatim from CHECKS.md, and the
-         batch's tests (experiment/review-batches.txt). A session never runs in a folder another one used.
+         checks in one session (D10), the briefs of CHK-1, CHK-3A and CHK-5 verbatim from CHECKS.md (or a
+         check's latest revision in BRIEF-REVISIONS.md, D12), and the batch's tests
+         (experiment/review-batches.txt). A session never runs in a folder another one used.
 run      claude -p in each batch folder: safe mode, the generation model and effort, tools limited to reading
          and writing files, a budget cap per session, a minimal environment. The result JSON (cost, duration, usage) goes to
          <workdir>/<batch>.result.json; the verdicts to <workdir>/<batch>/review-out/<CHECK>-<batch>.jsonl.
@@ -35,6 +36,7 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 CHECKS_MD = os.path.join(ROOT, 'experiment', 'control', 'CHECKS.md')
+REVISIONS_MD = os.path.join(ROOT, 'experiment', 'control', 'BRIEF-REVISIONS.md')
 BATCHES = os.path.join(ROOT, 'experiment', 'review-batches.txt')
 SNAPSHOT = os.path.join(ROOT, 'experiment', 'snapshot.sh')
 CHECKS = ('CHK-1', 'CHK-3A', 'CHK-5')
@@ -64,13 +66,20 @@ def die(msg):
 
 
 def briefs():
-    """The common brief and the three check briefs, exactly as CHECKS.md states them."""
+    """The common brief and the three check briefs as CHECKS.md states them, or a check's latest revision in
+    BRIEF-REVISIONS.md after a failed calibration (D12). {'revisions': {check: n}} says which were used."""
     text = open(CHECKS_MD).read()
     common = re.search(r'### 3\.0 .*?```text\n(.*?)```', text, re.S)
     out = {'common': common.group(1).rstrip()} if common else die('no common brief in CHECKS.md')
+    revised = open(REVISIONS_MD).read() if os.path.exists(REVISIONS_MD) else ''
+    out['revisions'] = {}
     for check in CHECKS:
         m = re.search(r'#{3,4} ' + re.escape(check) + r' .*?\*\*Brief:\*\*\s*```text\n(.*?)```', text, re.S)
         out[check] = m.group(1).rstrip() if m else die(f'no brief of {check} in CHECKS.md')
+        for n, body in re.findall(r'^## ' + re.escape(check) + r', revision (\d+) .*?```text\n(.*?)```', revised,
+                                  re.S | re.M):
+            if int(n) > out['revisions'].get(check, 0):
+                out['revisions'][check], out[check] = int(n), body.rstrip()
     return out
 
 
@@ -166,8 +175,8 @@ def prepare(args):
         with open(os.path.join(work, batch + '.brief.txt'), 'w') as f:
             f.write(brief)
         manifest['batches'][batch] = {'folder': dest, 'tests': [t.split(' — ')[0] for t in tests],
-                                      'brief_sha': sha(brief)}
-        print(f'{batch}: {len(tests)} tests, brief {sha(brief)}, folder {dest}')
+                                      'brief_sha': sha(brief), 'revisions': b['revisions']}
+        print(f'{batch}: {len(tests)} tests, brief {sha(brief)}, revisions {b["revisions"] or "none"}, folder {dest}')
     with open(manifest_path, 'w') as f:
         json.dump(manifest, f, indent=1)
 
