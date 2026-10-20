@@ -15,8 +15,13 @@ resets the payment-provider stub. At the end the stand goes back to the base wit
 unless --keep-stand. Maven runs with the caller's JAVA_HOME (recorded in summary.json): run every
 suite on the JDK its generating agent used.
 
-Output in <out dir>: <column>/ (reports, mvn.log, stand.log, summary.json) and matrix.csv with one
-row per test (class, name) and one column per run: pass, FAIL, ERROR, skip, or - (not run).
+Output in <out dir>: <column>/ (reports, mvn.log, stand.log, summary.json, outcomes.json); matrix.csv
+with one row per test (class, name) and one column per run: pass, FAIL, ERROR, skip, or - (not run);
+failures.csv, same layout, with the normalized first line of the failure message of every red cell
+(outcomes.json keeps the raw line as well). A test that is red on the base still detects a patch
+when that line changes. Normalized: UUIDs become U, digit runs become #, so ids, amounts and times
+do not count as a change; other per-run data (random names) still does, so compare against the
+spread of the line over repeated base runs.
 """
 import argparse
 import csv
@@ -29,6 +34,7 @@ import sys
 import tarfile
 import io
 import time
+import re
 import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -58,20 +64,33 @@ def export_suite(repo, ref, dest):
     return os.path.join(dest, 'api-tests')
 
 
+UUID = re.compile(r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}')
+
+
+def first_line(el):
+    """First line of a failure or error (its message, else its stack trace, else its type): normalized and raw."""
+    for text in (el.get('message'), el.text, el.get('type')):
+        lines = [x.strip() for x in (text or '').splitlines() if x.strip()]
+        if lines:
+            return re.sub(r'\d+', '#', UUID.sub('U', lines[0])), lines[0]
+    return '', ''
+
+
 def outcomes(folder):
-    """{(class, name): outcome} from every Surefire XML under folder."""
+    """{(class, name): (outcome, normalized first failure line, raw first line)} from every Surefire XML under folder."""
     out = {}
     for path in glob.glob(os.path.join(folder, '**', 'TEST-*.xml'), recursive=True):
         for case in ET.parse(path).getroot().iter('testcase'):
             key = (case.get('classname', ''), case.get('name', ''))
-            if case.find('failure') is not None:
-                res = 'FAIL'
-            elif case.find('error') is not None:
-                res = 'ERROR'
+            failure, error = case.find('failure'), case.find('error')
+            if failure is not None:
+                res = ('FAIL', *first_line(failure))
+            elif error is not None:
+                res = ('ERROR', *first_line(error))
             elif case.find('skipped') is not None:
-                res = 'skip'
+                res = ('skip', '', '')
             else:
-                res = 'pass'
+                res = ('pass', '', '')
             n, k = 1, key
             while k in out:  # a name repeated within the suite: keep every execution
                 n += 1
@@ -121,9 +140,9 @@ def run_column(args, column, out):
     res = outcomes(reports)
     summary['tests'] = len(res)
     for kind in ('pass', 'FAIL', 'ERROR', 'skip'):
-        summary[kind] = sum(1 for v in res.values() if v == kind)
-    with open(os.path.join(cdir, 'outcomes.json'), 'w') as f:
-        json.dump([[c, n, v] for (c, n), v in sorted(res.items())], f, indent=0)
+        summary[kind] = sum(1 for v, *_ in res.values() if v == kind)
+    with open(os.path.join(cdir, 'outcomes.json'), 'w') as f:  # raw lines too: normalization can be revised later
+        json.dump([[c, n, *v] for (c, n), v in sorted(res.items())], f, indent=0)
     if not args.keep_work:
         shutil.rmtree(work)
     return summary
@@ -134,13 +153,14 @@ def write_matrix(out, columns):
     for col in columns:
         path = os.path.join(out, col, 'outcomes.json')
         if os.path.exists(path):
-            res[col] = {(c, n): v for c, n, v in json.load(open(path))}
+            res[col] = {(row[0], row[1]): (row[2], row[3] if len(row) > 3 else '') for row in json.load(open(path))}
     keys = sorted({k for r in res.values() for k in r})
-    with open(os.path.join(out, 'matrix.csv'), 'w', newline='') as f:
-        w = csv.writer(f)
-        w.writerow(['class', 'test'] + columns)
-        for k in keys:
-            w.writerow([k[0], k[1]] + [res.get(col, {}).get(k, '-') for col in columns])
+    for name, part, missing in (('matrix.csv', 0, '-'), ('failures.csv', 1, '')):
+        with open(os.path.join(out, name), 'w', newline='') as f:
+            w = csv.writer(f)
+            w.writerow(['class', 'test'] + columns)
+            for k in keys:
+                w.writerow([k[0], k[1]] + [res[col][k][part] if k in res.get(col, {}) else missing for col in columns])
 
 
 def main():
