@@ -1,0 +1,32 @@
+# Batches of the agent checks (experiment/control/CHECKS.md §2.3 and §4).
+# <batch> <test class> [<first CL-ID>..<last CL-ID>] — a batch may take several classes, one per line.
+
+# Suite B
+B01 ValidationTest
+B02 IdempotencyKeyTest CL-083..CL-092
+B03 IdempotencyKeyTest CL-093..CL-101
+B04 DepositTest
+B05 WithdrawalTest
+B06 GameSessionTest CL-053..CL-062
+B07 GameSessionTest CL-063..CL-068
+B07 SessionTimingTest
+B08 DepositLimitsTest CL-012..CL-023
+B09 DepositLimitsTest CL-024..CL-033
+B10 DepositLimitCountingTest
+B10 EventsTest
+B11 PaymentProviderTest
+B11 ConcurrencyTest
+B12 SecurityTest
+B12 InvariantTest
+B13 LeaderboardTest
+B13 LeaderboardPeriodTest
+
+# Calibration sample
+S1 DepositTest
+S1 GameSessionTest
+S1 SessionTimingTest
+S1 DepositLimitsTest
+S2 IdempotencyKeyTest
+S2 EventsTest
+S2 ConcurrencyTest
+S2 PaymentProviderTest
