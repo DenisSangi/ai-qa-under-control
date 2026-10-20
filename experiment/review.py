@@ -5,7 +5,7 @@ batch, and the calibration score.
   experiment/review.py prepare <workdir> --suite <repo> <ref> BATCH...
   experiment/review.py prepare <workdir> --sample <dir> BATCH...
   experiment/review.py run <workdir> [BATCH...] [--budget USD] [--dry-run]
-  experiment/review.py score <workdir> <answer key>
+  experiment/review.py score <workdir> <answer key> [--adjust <adjudication>]
 
 prepare  For each batch: <workdir>/<batch>/ holds the specification and the suite, or the calibration sample in
          place of api-tests/, without the service sources, the generating agent's plan and report, run reports
@@ -17,6 +17,7 @@ run      claude -p in each batch folder: safe mode, the generation model and eff
          <workdir>/<batch>.result.json; the verdicts to <workdir>/<batch>/review-out/<CHECK>-<batch>.jsonl.
 score    The calibration rule of CHECKS.md §4: every expected FLAG is FLAG and every expected PASS is PASS;
          UNCLEAR, a missing or a duplicate verdict is a miss. A kind mismatch is reported but does not count.
+         --adjust applies a human adjudication of the key (a csv block: test, check, verdict, kind) on top of it.
 """
 import argparse
 import csv
@@ -222,32 +223,44 @@ def run(args):
               f'verdicts {counts}', flush=True)
 
 
+def csv_block(path):
+    block = re.search(r'```csv\n(.*?)```', open(path).read(), re.S) or die(f'no csv block in {path}')
+    return list(csv.DictReader(io.StringIO(block.group(1))))
+
+
 def score(args):
     work = os.path.realpath(args.workdir)
     manifest = json.load(open(os.path.join(work, 'manifest.json')))
-    block = re.search(r'```csv\n(.*?)```', open(args.key).read(), re.S) or die('no csv block in the key')
-    key = {row['test']: row for row in csv.DictReader(io.StringIO(block.group(1)))}
+    family = {'CHK-1': 'E', 'CHK-3A': 'L', 'CHK-5': 'H'}
+    want = {c: {} for c in CHECKS}  # check -> test -> (verdict, kind)
+    for row in csv_block(args.key):
+        for c in CHECKS:
+            want[c][row['test']] = (row[c], row['defect'] if row['defect'].startswith(family[c]) else None)
+    if args.adjust:
+        for row in csv_block(args.adjust):
+            if row['test'] not in want[row['check']]:
+                die(f'adjudication names a test the key does not have: {row["test"]}')
+            want[row['check']][row['test']] = (row['verdict'], row['kind'] or None)
     got = {c: {} for c in CHECKS}
     for batch, info in manifest['batches'].items():
         for c, rows in verdicts(info['folder'], batch).items():
             for test, vs in rows.items():
                 got[c].setdefault(test, []).extend(vs)
-    family = {'CHK-1': 'E', 'CHK-3A': 'L', 'CHK-5': 'H'}
     ok = True
     for c in CHECKS:
         misses, kinds = [], []
-        for test, row in key.items():
+        for test, (verdict, kind) in want[c].items():
             vs = got[c].get(test, [])
-            want = row[c]
             if len(vs) != 1:
-                misses.append(f'{test}: {len(vs)} verdicts, want {want}')
-            elif vs[0].get('verdict') != want:
-                misses.append(f'{test}: {vs[0].get("verdict")}, want {want}')
-            elif want == 'FLAG' and row['defect'].startswith(family[c]) and vs[0].get('kind') != row['defect']:
-                kinds.append(f'{test}: kind {vs[0].get("kind")}, key {row["defect"]}')
-        extra = sorted(set(got[c]) - set(key))
+                misses.append(f'{test}: {len(vs)} verdicts, want {verdict}')
+            elif vs[0].get('verdict') != verdict:
+                misses.append(f'{test}: {vs[0].get("verdict")}, want {verdict}')
+            elif verdict == 'FLAG' and kind and vs[0].get('kind') != kind:
+                kinds.append(f'{test}: kind {vs[0].get("kind")}, key {kind}')
+        extra = sorted(set(got[c]) - set(want[c]))
         ok = ok and not misses
-        print(f'{c}: {"PASS" if not misses else "FAIL"} — {len(key) - len(misses)}/{len(key)} as expected')
+        n = len(want[c])
+        print(f'{c}: {"PASS" if not misses else "FAIL"} — {n - len(misses)}/{n} as expected')
         for line in misses:
             print(f'  miss  {line}')
         for line in kinds:
@@ -274,6 +287,7 @@ def main():
     ps = sub.add_parser('score')
     ps.add_argument('workdir')
     ps.add_argument('key')
+    ps.add_argument('--adjust', help='adjudication of the key (KEY-ADJUDICATION.md)')
     args = p.parse_args()
     return {'prepare': prepare, 'run': run, 'score': score}[args.cmd](args)
 
