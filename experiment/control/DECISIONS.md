@@ -16,7 +16,7 @@ Origin: **A** — the design agent's recommendation, confirmed by Claude; **C** 
 | D5 | (b): secondary pairs are info and go to the audit | A |
 | D6 | (a): OWN_TESTS_MISS is a finding (medium) | A |
 | D7 | own requirement = all tags; parameterized rows = worst-of | A |
-| D8 | (b): the fixer gets the requirement, the part broken and how to observe it, not "what changed" | A |
+| D8 | (b): the fixer gets the requirement, the part broken and how to observe it, not "what changed". Clarification after the audit: references to the service code in those texts (file and line of a step the base already lacks) are removed as well | A, plus a clarification by Claude accepted by the author |
 | D9 | (c): no service sources, TEST-PLAN or TEST-REPORT in the checking agents' folder; calibration the same | A |
 | D10 | **One session per batch runs CHK-1, CHK-3A and CHK-5 together**, each with its own brief and its own verdict file; calibration in the same combination. 13 sessions on the suite + 2 batches × R = 2 = 4 for calibration: **17 sessions instead of 51** | C |
 | D11 | R = 2, both without misses; the kind of defect is info | A |
@@ -26,7 +26,7 @@ Origin: **A** — the design agent's recommendation, confirmed by Claude; **C** 
 | D15 | (a): CHK-1 is anchored on the claim in `@DisplayName` | A |
 | D16 | quiet period for "no event" 1 s; wait for an event without a spec bound 10 s; H4 margin 500 ms; the 1 s period is a known limit | A |
 | D17 | (b): a display name may be narrowed only when CHK-3A shows the claim goes beyond the spec | A |
-| D18 | (a): the `protected` list | A |
+| D18 | (a): the `protected` list. Clarification after the audit: a CHK-3A FLAG of kind L1 or L2 questions only the tags, not an expectation, so it does not keep a base-red test off the list | A, plus a clarification by Claude accepted by the author |
 | D19 | selection per §5; withholding threshold 10 % | A |
 | D20 | (a): CHK-6 runs | A |
 
