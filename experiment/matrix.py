@@ -6,7 +6,8 @@ from a fresh stand, and records the outcome of every test in every run.
 
   <suite repo>  git repository that holds the suite in api-tests/ (a generation or control folder)
   <ref>         commit or tag of the suite (A, B, C1, ...)
-  COLUMN        `base`, or a patch ID in the bugs directory (bugs.sh AQC_BUGS_DIR)
+  COLUMN        `base`, or a patch ID in the bugs directory (bugs.sh AQC_BUGS_DIR); `ID#n` is another run of
+                the same patch (B04#2)
 
 For each column: `bugs.sh off --fresh` (base) or `bugs.sh on <ID> --fresh`, so every run starts
 from the same data, clock and stub; the suite exported from <ref> without its stored reports into
@@ -114,7 +115,7 @@ def run_column(args, column, out):
                'java_home': os.environ.get('JAVA_HOME', ''),
                'started': time.strftime('%Y-%m-%dT%H:%M:%S%z')}
 
-    switch = [BUGS, 'off', '--fresh'] if column == 'base' else [BUGS, 'on', column, '--fresh']
+    switch = [BUGS, 'off', '--fresh'] if column == 'base' else [BUGS, 'on', column.split('#')[0], '--fresh']
     t0 = time.time()
     rc = sh(switch, stand_log, env=env)
     summary['switch_s'] = round(time.time() - t0)

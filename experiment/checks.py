@@ -5,6 +5,7 @@
   experiment/checks.py stability <out> <repo> <ref> [--analyze]
   experiment/checks.py order <out> <repo> <ref> [--analyze]
   experiment/checks.py faults <out> <matrix dir> <MUTANTS.md>
+  experiment/checks.py measure <out> <checks> <matrix dir>
   experiment/checks.py audit <out> <agent workdir> [--seed N] [--force]
   experiment/checks.py assemble <out> <agent workdir>
 
@@ -29,6 +30,10 @@ faults     CHK-4 over matrix.py's matrix.csv and failures.csv (needs CHK-2). An 
            its executions does: worst-of per test (D7) for every test that is not both green and red on the base
            (such a test is reported as MIXED_ON_BASE).
            -> <out>/chk4/faults.csv, green_own.csv, findings.jsonl, info.jsonl.
+measure    Stage 6 (experiment/MEASURE.md) over matrix.py's matrix of a suite against the seeded bugs, with the
+           tag map and CHK-2 of the same suite in <checks>. A run detects a bug when a usable test detects it as in
+           faults; a bug is CAUGHT when at least one of its runs (B04, B04#2, ...) that is valid (D3) detects it.
+           -> <out>/bugs.csv, info.jsonl, summary.json.
 audit      §5 (needs the agent checks and every script check): contradictions between agent verdicts and script
            results, every CHK-3A L3, every UNCLEAR, and a seeded random 10 % of the other FLAGs and 5 % of the
            other PASSes per agent check (at least 5 each) -> <out>/audit/AUDIT.md, one item per verdict with a
@@ -212,19 +217,32 @@ def read_tagmap(out):
 
 def test_of(tagmap):
     """A function (Surefire class, Surefire name) -> tagmap row: the test of the class whose display name is the
-    longest that the execution's name equals or continues with a space (the invocation name)."""
+    longest that the execution's name equals or continues with a space (the invocation name). A suite whose
+    Surefire reports name executions by method instead (A) maps by the method name, followed by "(" for a
+    parameterized test."""
     by_class = collections.defaultdict(list)
     for r in tagmap:
         by_class[r['class']].append(r)
 
     def find(cls, name):
         best = None
-        for r in by_class.get(cls.rsplit('.', 1)[-1], []):
+        rows = by_class.get(cls.rsplit('.', 1)[-1], [])
+        for r in rows:
             dn = r['display_name']
             if dn and (name == dn or name.startswith(dn + ' ')) and (not best or len(dn) > len(best['display_name'])):
                 best = r
+        if best is None:
+            best = next((r for r in rows if name == r['method'] or name.startswith(r['method'] + '(')), None)
         return best
     return find
+
+
+def invocation_of(r, name):
+    """The part of an execution's Surefire name after what maps it to its test r (see test_of)."""
+    dn = r['display_name']
+    if dn and (name == dn or name.startswith(dn + ' ')):
+        return name[len(dn):].strip()
+    return name[len(r['method']):]
 
 
 # --- findings -------------------------------------------------------------------------------------------------
@@ -477,7 +495,7 @@ def analyze_stability(out, tagmap, cdir, plan, repo, ref):
         else:
             when = 'aged only' if len(fresh_cls) == 1 else 'fresh'
         messages = sorted({v[1] for _, v in vals if v[1]})
-        invocation = k[1][len(r['display_name']):].strip()
+        invocation = invocation_of(r, k[1])
         rows.append([r['class'], r['display_name'], invocation, len(vals), c['pass'], c['FAIL'], c['ERROR'], c['skip'],
                      verdict, when, ' || '.join(messages)])
         per_test[r['test']].append((verdict, invocation, c, when, messages))
@@ -706,50 +724,51 @@ def no_code(text):
     return re.sub(r':?\s*`[^`]*\.(?:java|yml|yaml|sql|properties)(?::[\d-]+)?`', '', text)
 
 
-def faults(args):
-    out = os.path.realpath(args.out)
-    tagmap = read_tagmap(out)
-    by_test = {r['test']: r for r in tagmap}
-    find = test_of(tagmap)
-    ids = spec_ids()
-    chk2 = os.path.join(out, 'chk2', 'stability.csv')
+def detects(verdict, line, cell):
+    """D4 with its clarification: a red execution detects a faulty version when it is STABLE_GREEN in CHK-2, or
+    STABLE_RED there with one normalized first failure line in every run and red here with another line."""
+    value, mline = cell
+    if value not in ('FAIL', 'ERROR'):
+        return False
+    return verdict == 'STABLE_GREEN' or (verdict == 'STABLE_RED' and line is not None and mline != line)
+
+
+def executions(base_dir, matrix_dir):
+    """The executions of matrix.py's matrix.csv and failures.csv in matrix_dir with their base from CHK-2 in
+    base_dir (tagmap.csv, chk2/stability.csv): usable green, usable red (one normalized line in every run, D4), or
+    not usable. A STABLE_GREEN execution that is red in the matrix's own base column is EXCLUDED. A test is usable
+    when every execution is. -> columns, [(test, CHK-2 verdict, base line, {column: (value, line)})],
+    {test: usable}, {test: green on the base}, excluded tests, info."""
+    find = test_of(read_tagmap(base_dir))
+    chk2 = os.path.join(base_dir, 'chk2', 'stability.csv')
     if not os.path.exists(chk2):
         die(f'{chk2} is missing: run stability (CHK-2) first')
-
-    # executions on the base, from CHK-2: usable green, usable red (one normalized line in every run, D4), or not
     base = {}
     for row in csv.DictReader(open(chk2)):
         lines = [m for m in row['messages'].split(' || ') if m]
         steady = row['verdict'] == 'STABLE_RED' and len(lines) == 1 and not (int(row['fail']) and int(row['error']))
-        base[(row['class'], f'{row["display_name"]} {row["invocation"]}'.strip())] = (
-            row['verdict'], lines[0] if steady else None)
+        base[(row['class'], row['display_name'], row['invocation'])] = (row['verdict'], lines[0] if steady else None)
 
-    values = list(csv.reader(open(os.path.join(args.matrix, 'matrix.csv'))))
-    lines = list(csv.reader(open(os.path.join(args.matrix, 'failures.csv'))))
+    values = list(csv.reader(open(os.path.join(matrix_dir, 'matrix.csv'))))
+    lines = list(csv.reader(open(os.path.join(matrix_dir, 'failures.csv'))))
     columns = values[0][2:]
-    if lines[0][2:] != columns or 'base' not in columns:
-        die('matrix.csv and failures.csv do not have the same columns with base')
+    if lines[0][2:] != columns:
+        die('matrix.csv and failures.csv do not have the same columns')
     info = []
-    execs = []  # (test, chk2 verdict, base line, {column: (value, line)})
+    execs = []
     for vrow, lrow in zip(values[1:], lines[1:]):
         r = find(vrow[0], vrow[1])
         if r is None:
             die(f'JOIN_ERROR: matrix row {vrow[:2]} does not map to a test of tagmap.csv')
-        verdict, line = base.get((r['class'], vrow[1]), ('NOT_IN_CHK2', None))
+        verdict, line = base.get((r['class'], r['display_name'], invocation_of(r, vrow[1])), ('NOT_IN_CHK2', None))
         cells = dict(zip(columns, zip(vrow[2:], lrow[2:])))
-        if verdict == 'STABLE_GREEN' and cells['base'][0] != 'pass':
+        if verdict == 'STABLE_GREEN' and 'base' in cells and cells['base'][0] != 'pass':
             info.append({'kind': 'BASE_COLUMN_RED', 'test': r['test'], 'execution': vrow[1],
                          'matrix_base': cells['base'][0]})
             verdict = 'EXCLUDED'
         execs.append((r['test'], verdict, line, cells))
 
-    def detects(verdict, line, cell):
-        value, mline = cell
-        if value not in ('FAIL', 'ERROR'):
-            return False
-        return verdict == 'STABLE_GREEN' or (verdict == 'STABLE_RED' and line is not None and mline != line)
-
-    usable = collections.defaultdict(lambda: True)  # a test is usable when every execution is green or steady red
+    usable = collections.defaultdict(lambda: True)
     green = collections.defaultdict(lambda: True)
     for test, verdict, line, _ in execs:
         usable[test] &= verdict == 'STABLE_GREEN' or (verdict == 'STABLE_RED' and line is not None)
@@ -760,6 +779,16 @@ def faults(args):
         kinds[test].add(verdict)
     for test in sorted(t for t, v in kinds.items() if {'STABLE_GREEN', 'STABLE_RED'} <= v):
         info.append({'kind': 'MIXED_ON_BASE', 'test': test})
+    return columns, execs, usable, green, excluded, info
+
+
+def faults(args):
+    out = os.path.realpath(args.out)
+    tagmap = read_tagmap(out)
+    ids = spec_ids()
+    columns, execs, usable, green, excluded, info = executions(out, args.matrix)
+    if 'base' not in columns:
+        die('the matrix has no base column')
 
     faults_rows, pairs, findings, status_n = [], [], [], collections.Counter()
     for m in mutants(args.mutants):
@@ -838,6 +867,56 @@ def faults(args):
     print(f'faults {len(faults_rows)}: ' + ', '.join(f'{k} {v}' for k, v in sorted(status_n.items())) +
           f'; pairs primary {n_pairs["primary"]}, secondary {n_pairs["secondary"]}; excluded tests {len(excluded)}; '
           f'not mutated {len(ids) - len(mutated & set(ids))}; findings {len(findings)}')
+
+
+# --- stage 6 --------------------------------------------------------------------------------------------------
+
+def measure(args):
+    out = os.path.realpath(args.out)
+    columns, execs, usable, _, excluded, info = executions(os.path.realpath(args.checks), args.matrix)
+    if 'base' not in columns:
+        die('the matrix has no base column')
+    runs = collections.defaultdict(list)  # bug -> its columns, in matrix order
+    for col in columns:
+        if col != 'base':
+            runs[col.split('#')[0]].append(col)
+
+    rows, status_n = [], collections.Counter()
+    for bug, cols in runs.items():
+        valid, caught_in, hit = [], [], collections.defaultdict(set)  # hit: test -> values of its detections
+        for col in cols:
+            vals = [e[3][col][0] for e in execs]
+            if 'pass' not in vals or vals.count('ERROR') >= 0.9 * len(vals):
+                info.append({'kind': 'INVALID_RUN', 'run': col})
+                continue
+            valid.append(col)
+            found = False
+            for test, verdict, line, cells in execs:
+                if usable[test] and detects(verdict, line, cells[col]):
+                    hit[test].add(cells[col][0])
+                    found = True
+            if found:
+                caught_in.append(col)
+        status = 'NOT_EVALUATED' if not valid else 'CAUGHT' if caught_in else 'MISSED'
+        status_n[status] += 1
+        rows.append([bug, len(cols), len(valid), len(caught_in), status, ' '.join(sorted(hit)),
+                     ' '.join(sorted(t for t, v in hit.items() if v == {'ERROR'}))])
+    if excluded:
+        info.append({'kind': 'EXCLUDED_TESTS', 'tests': excluded,
+                     'why': 'unstable in CHK-2, red with a varying line, or red in the matrix base column'})
+
+    os.makedirs(out, exist_ok=True)
+    with open(os.path.join(out, 'bugs.csv'), 'w', newline='') as f:
+        w = csv.writer(f)
+        w.writerow(['bug', 'runs', 'valid_runs', 'runs_detected', 'status', 'detecting_tests', 'error_only'])
+        w.writerows(rows)
+    write_jsonl(os.path.join(out, 'info.jsonl'), info)
+    base = json.load(open(os.path.join(args.matrix, 'base', 'summary.json')))
+    with open(os.path.join(out, 'summary.json'), 'w') as f:
+        json.dump({'suite': base.get('suite'), 'ref': base.get('ref'), 'commit': base.get('commit'),
+                   'bugs': len(rows), **status_n, 'excluded_tests': len(excluded)}, f, indent=1)
+    print(f'{base.get("ref")}: bugs {len(rows)}: ' + ', '.join(f'{k} {v}' for k, v in sorted(status_n.items())) +
+          f'; excluded tests {len(excluded)}')
 
 
 # --- audit and assembly ---------------------------------------------------------------------------------------
@@ -1078,6 +1157,10 @@ def main():
     pf.add_argument('out')
     pf.add_argument('matrix', help='folder with matrix.csv and failures.csv (matrix.py)')
     pf.add_argument('mutants', help='MUTANTS.md of the faulty versions')
+    pe = sub.add_parser('measure')
+    pe.add_argument('out')
+    pe.add_argument('checks', help='folder with tagmap.csv and chk2/ of the same suite')
+    pe.add_argument('matrix', help='folder with matrix.csv and failures.csv (matrix.py) against the seeded bugs')
     pa = sub.add_parser('audit')
     pa.add_argument('out')
     pa.add_argument('workdir', help='workdir of the agent checks (review.py)')
@@ -1087,8 +1170,8 @@ def main():
     pm.add_argument('out')
     pm.add_argument('workdir', help='workdir of the agent checks (review.py)')
     args = p.parse_args()
-    return {'tags': tags, 'stability': stability, 'order': order, 'faults': faults, 'audit': audit,
-            'assemble': assemble}[args.cmd](args)
+    return {'tags': tags, 'stability': stability, 'order': order, 'faults': faults, 'measure': measure,
+            'audit': audit, 'assemble': assemble}[args.cmd](args)
 
 
 if __name__ == '__main__':
