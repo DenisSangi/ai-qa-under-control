@@ -1,6 +1,6 @@
 # Report: what an AI-generated API test suite catches, and what the human adds
 
-Experiment run 13–29 October 2026. One system, one frozen specification, 16 seeded bugs, three test suites written
+Experiment run 13–30 October 2026. One system, one frozen specification, 16 seeded bugs, three test suites written
 by AI agents. Every number below comes from a run record; where a number was not recorded, the report says so.
 
 ## 1. Summary
@@ -227,9 +227,15 @@ fields, so on the input of M03 it gives the same wrong result, but not the other
 - **Seeded bugs are a coarse instrument for control.** B already caught 15 of 16, so the control could add at most
   one. What the control changed is visible in the suite itself: 73 test defects fixed; the 4 requirements on which
   a mutant passed every test (LIM-10, SES-07, LDB-01, GEN-10) got strengthened tests; B10 is caught by 7 tests
-  instead of 3. Whether those strengthened tests now catch their mutants was not measured (the mutant matrix was
-  not re-run on C1), and the 35 "unstable by construction" findings were never reproduced in 10 runs: these are
-  claims of the control, not measurements.
+  instead of 3. The mutant matrix re-run on C1 (30 October, 64 mutants, 236 min of system time, $0) measured
+  that part: all 8 requirements B's tests could not fail on are now failed by their own tests; CHK-4 on C1 is
+  63 caught, 0 only by other tests, 1 by no test (B: 56 / 4 / 4). The one miss is not a regression of the fixer.
+  M50 (LDB-02: the period that starts on the 21st ends on the 1st of the next month, not 10 days later) differs
+  from the base only in months of 31 days and in February, and the period test checks the next boundary after the
+  service clock. The B run, started on 20 October, moved that clock to 31 October and caught M50; the C1 run,
+  started on 30 October, moved it past 1 November and did not. B's catch was the calendar: neither suite pins the
+  boundary after the 31st. The 35 "unstable by construction" findings were never reproduced in 10 runs: these
+  remain claims of the control, not measurements.
 - **The specification moved more than the control.** The minimal task did not fail by writing fewer tests (A wrote
   152 test methods, B 136). It failed by choosing the code as the oracle: rules that exist only as code order or as one branch
   of a condition were either not tested or were tested with data that could not tell a right implementation from a
@@ -257,6 +263,7 @@ is the author's, as recorded in the run log.
 | Control, per suite: fixing agent → C1 | 33 min | $10.23 | 49 min (estimate: agent time + 50 %) |
 | Review of meaning → C2 | — | $0 | 30 min |
 | Measurement | 184 min of system time | $0 | launch only |
+| Re-check: mutant matrix on C1 | 236 min of system time | $0 | launch only |
 | Out of the table: pilot, first run of A | 28 + 41 min | $6.71 + $9.17 | 60 + 60 min |
 
 The author's time in this table is 769 min, about 13 hours: 215 min to define the oracle and run A and B, 230 min of

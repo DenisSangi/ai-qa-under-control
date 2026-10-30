@@ -296,6 +296,12 @@ only tests of other requirements failed.
 **Cause:** agent ignored the specification — each of these points is written in it. **Prevent:** coverage by tags
 is not coverage; a faulty version per requirement is cheap to run and shows which requirements no test can fail on.
 
+**After the fix (C1).** The same 64 mutants on C1: all 8 are now failed by their own tests. One mutant B had
+caught passed on C1: M50 breaks the end of the period that starts on the 21st, which differs from the base only
+after the 31st of a month. The period test checks whichever boundary comes next on the service clock; the B run
+reached 31 October, the C1 run, ten days later, did not. A test whose input depends on the date of the run catches
+some faults only on some days: a boundary named by the specification needs a test that sets the clock to it.
+
 <a id="aim-12"></a>
 
 ## AIM-12 An overstated claim about its own verification
