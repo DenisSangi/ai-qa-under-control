@@ -245,19 +245,23 @@ is the author's, as recorded in the run log.
 
 | Item | Agent time | Model cost | Author's time |
 |---|---|---|---|
-| Specification (exploration, decisions, text) | one session | ≈ 40 % of a 5-hour Opus usage window; no dollar figure | 120 min recorded |
+| Specification (exploration, decisions, text) | one session | ≈ 40 % of a 5-hour Opus usage window; no dollar figure | 120 min |
 | A — generation | 28 min | $7.35 | 45 min |
 | B — generation | 37 min | $9.27 | 50 min |
 | Control, one-time: mutants | 41 min | $9.23 | 50 min |
 | Control, one-time: design of checks and sample | 34 min | $9.60 | 90 min |
-| Control, one-time: calibration, 2 rounds | 8 sessions | $14.03 | not recorded |
-| Control, per suite: agent checks on B (13 sessions) | 108 min of sessions | $29.00 (of which $3.04 lost to a usage-limit abort) | — |
-| Control, per suite: script checks | 27 min of system time | $0 | — |
-| Control, per suite: audit of 59 verdicts | — | $0 | not recorded |
+| Control, one-time: calibration, 2 rounds | 8 sessions | $14.03 | 90 min |
+| Control, per suite: agent checks on B (13 sessions) | 108 min of sessions | $29.00 (of which $3.04 lost to a usage-limit abort) | 150 min |
+| Control, per suite: script checks | 27 min of system time | $0 | 45 min |
+| Control, per suite: audit of 59 verdicts | — | $0 | 50 min |
 | Control, per suite: fixing agent → C1 | 33 min | $10.23 | 49 min (estimate: agent time + 50 %) |
 | Review of meaning → C2 | — | $0 | 30 min |
 | Measurement | 184 min of system time | $0 | launch only |
 | Out of the table: pilot, first run of A | 28 + 41 min | $6.71 + $9.17 | 60 + 60 min |
+
+The author's time in this table is 769 min, about 13 hours: 215 min to define the oracle and run A and B, 230 min of
+one-time control setup, 294 min of control per suite, 30 min of review. Writing prompts and choosing the bugs were
+not timed.
 
 Per caught seeded bug: A $0.61 (12 bugs), B $0.62 (15 bugs) in generation cost. The control's one extra bug cost
 $39.23 of per-suite control plus $32.86 of one-time setup. Priced by seeded bugs alone the control looks expensive;
@@ -290,7 +294,7 @@ the same money bought 73 fixed test defects, and the one-time part is reusable f
   non-integer `playerId` is a format error or an unknown player is not specified.
 - **Seed data.** Generation ran on a base with random seed data; the measurement ran on the same code with a fixed
   seed. B's base result on both was identical (189 executions, the same 24 red).
-- **Unrecorded human time** for prompt writing, bug selection, calibration adjudication and the audit.
+- **Unrecorded human time** for prompt writing and bug selection.
 
 ## 11. Pilot
 
