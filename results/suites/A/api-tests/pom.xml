@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Standalone black-box API regression suite. Not a module of the root build:
+         it talks to the running stand over the network only. -->
+    <groupId>com.arcade</groupId>
+    <artifactId>arcade-api-tests</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>Arcade API regression tests</name>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <junit.version>5.11.4</junit.version>
+        <assertj.version>3.26.3</assertj.version>
+        <awaitility.version>4.2.2</awaitility.version>
+        <jackson.version>2.18.2</jackson.version>
+        <postgresql.version>42.7.4</postgresql.version>
+        <kafka.version>3.8.0</kafka.version>
+        <slf4j.version>2.0.16</slf4j.version>
+
+        <!-- Endpoints of the running stand; override with -Dapi.baseUrl=... etc. -->
+        <api.baseUrl>http://localhost:8080</api.baseUrl>
+        <ws.url>ws://localhost:8080/ws/leaderboard</ws.url>
+        <kafka.bootstrap>localhost:9094</kafka.bootstrap>
+        <stub.baseUrl>http://localhost:8089</stub.baseUrl>
+        <db.url>jdbc:postgresql://localhost:5433/arcade</db.url>
+        <db.user>arcade_reader</db.user>
+        <db.password>arcade_reader</db.password>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>${awaitility.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <!-- The service clock is global: tests must not run in parallel. -->
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <trimStackTrace>false</trimStackTrace>
+                    <systemPropertyVariables>
+                        <api.baseUrl>${api.baseUrl}</api.baseUrl>
+                        <ws.url>${ws.url}</ws.url>
+                        <kafka.bootstrap>${kafka.bootstrap}</kafka.bootstrap>
+                        <stub.baseUrl>${stub.baseUrl}</stub.baseUrl>
+                        <db.url>${db.url}</db.url>
+                        <db.user>${db.user}</db.user>
+                        <db.password>${db.password}</db.password>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

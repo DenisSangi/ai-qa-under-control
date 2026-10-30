@@ -1,0 +1,2167 @@
+{
+ "meta": {
+  "suite": "api-tests @ 687f41f",
+  "spec": "docs/spec/SPEC.md @ 7e25968",
+  "generated": "2026-10-29T12:44:26Z",
+  "checks": {
+   "CHK-1": "calibrated 2/2; audit 0/36 wrong",
+   "CHK-2": "10 runs",
+   "CHK-3S": "ok",
+   "CHK-3A": "calibrated 2/2; audit 0/12 wrong",
+   "CHK-4": "65 runs, 0 not evaluated",
+   "CHK-5": "calibrated 2/2; audit 0/11 wrong",
+   "CHK-6": "ok"
+  },
+  "rules": "The specification is the oracle. Cite the requirement ID for every change."
+ },
+ "protected": [
+  {
+   "test": "ConcurrencyTest#withdrawalVersusSessionStart",
+   "display_name": "CL-128 concurrent withdrawal and session start for the same money: exactly one succeeds",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-26: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "GameSessionTest#keyRangeSessionBalanceOrder",
+   "display_name": "CL-062 order of checks: key before bet range, bet range before active session, active session before balance",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against SES-06: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#emptyKey",
+   "display_name": "CL-084 empty Idempotency-Key -> 400 IDEMPOTENCY_KEY_REQUIRED for deposit, withdrawal, session start",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-08: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#keyNotPrintableAscii",
+   "display_name": "CL-087 non-printable or non-ASCII key (TAB, é) -> 400 IDEMPOTENCY_KEY_INVALID",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-09: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#keySharedAcrossOperations",
+   "display_name": "CL-088 one key space per player: deposit key reused for withdrawal/session, session key for deposit -> 422",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-10 GEN-13: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#keyTooLong",
+   "display_name": "CL-086 a key of 65 characters -> 400 IDEMPOTENCY_KEY_INVALID for deposit, withdrawal, session start",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-09: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#missingKey",
+   "display_name": "CL-083 missing Idempotency-Key -> 400 IDEMPOTENCY_KEY_REQUIRED for deposit, withdrawal, session start",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-08: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#replayIgnoresCurrentChecks",
+   "display_name": "CL-094 replay returns the original response although a check would refuse now",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-12: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#sessionFingerprint",
+   "display_name": "CL-090 session start fingerprint: same game and bet -> replay; other game or bet -> 422 REUSED",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-11 GEN-13: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#sessionStartReplay",
+   "display_name": "CL-093 session start replay: 201 same body + header; no second BET, no second event",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-12: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "IdempotencyKeyTest#withdrawalErrorsKeepKeyFree",
+   "display_name": "CL-099 withdrawal errors (range, active session, insufficient funds, payout decline) keep the key free",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-15: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "PaymentProviderTest#depositTimeout",
+   "display_name": "CL-114 deposit, provider slower than 5 s: 504 PAYMENT_TIMEOUT within 6 s; nothing changes; key free",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-18 GEN-19: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "PaymentProviderTest#withdrawalTimeout",
+   "display_name": "CL-115 withdrawal, provider slower than 5 s: 504 PAYMENT_TIMEOUT within 6 s; nothing changes; key free",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-18 GEN-19: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "SecurityTest#nonIntegerPlayerId",
+   "display_name": "CL-136 a non-integer playerId (N.5) is refused, never truncated to player N",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-03 GEN-07: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "ValidationTest#nonNumericId",
+   "display_name": "CL-107 a non-numeric id in the path -> 400 BAD_REQUEST",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against GEN-06: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "WithdrawalTest#activeSessionBlocks",
+   "display_name": "CL-045 active session: 409 ACTIVE_SESSION_EXISTS, nothing changes, provider not called, key free",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against WDR-03: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  },
+  {
+   "test": "WithdrawalTest#sessionBeforeBalanceBeforeProvider",
+   "display_name": "CL-052 order of checks: active session before balance, balance before provider",
+   "base": "STABLE_RED",
+   "reason": "Fails on the current system, and CHK-3A confirms every expectation against WDR-06: the failure is a system defect.",
+   "rule": "Do not change its expected outcomes. Other findings on this test may still be fixed."
+  }
+ ],
+ "findings": [
+  {
+   "id": "F-da879650ca",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "ConcurrencyTest#concurrentSessionStarts",
+    "display_name": "CL-127 concurrent session starts: exactly one ACTIVE session and one BET",
+    "tags": [
+     "GEN-26",
+     "SES-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/ConcurrencyTest.java",
+    "line": 67
+   },
+   "requirement": "SES-01",
+   "spec_quote": "SES-01: \"Response: 201 with the session ...: status = ACTIVE\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "The claim point 'exactly one ACTIVE session' names a session state, but no assertion reads the status of the created session (not the 201 body, not GET /api/sessions/{id}). Only the number of 201 answers is counted (line 67), which is a different observation point. Witness: one start answers 201 with a session in status FINISHED (winAmount 0, and GET /api/sessions/{id} also shows FINISHED), the other four answer 409 ACTIVE_SESSION_EXISTS, the balance is 90 and there is one BET record. Lines 67-71 all pass, yet the player has no ACTIVE session. The 'one BET' point is observed (line 70, with balance 90 at line 69 and balance = journal at line 71).",
+   "expected_after_fix": "In addition to one 201, four 409 ACTIVE_SESSION_EXISTS, balance 90 and one BET record, the test must establish that the session created by the successful start has status ACTIVE, both in the 201 body and when read through GET /api/sessions/{id}.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M15 (secondary)",
+     "M40 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-3accb696c5",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "ConcurrencyTest#concurrentSameKey",
+    "display_name": "CL-129 concurrent requests with one key: the operation is performed exactly once",
+    "tags": [
+     "GEN-26",
+     "GEN-14"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/ConcurrencyTest.java",
+    "line": 114
+   },
+   "requirement": "GEN-12",
+   "spec_quote": "GEN-12: \"The operation is not performed again: balance, journal and events do not change.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "Per GEN-12, an operation that is 'not performed again' leaves balance, journal and events unchanged, so 'performed exactly once' means one change of each. The test asserts the balance (line 112), the DEPOSIT records (line 113) and the provider calls (line 114), but it never reads player-events. Witness: the service deposits once (balance 100, one DEPOSIT record, one POST /payments, one fresh 200, the other answers replays or 409 IDEMPOTENCY_KEY_IN_PROGRESS) but publishes a DEPOSIT event for every request that answered 200. player-events then holds several DEPOSIT events for the single operation, and the test still passes.",
+   "expected_after_fix": "After waiting the standard event timeout and then a quiet period, the test must establish that player-events contains exactly one DEPOSIT event for the player with amount 100. This is in addition to balance 100, one DEPOSIT record and one POST /payments.",
+   "fix_scope": "assertion",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M15 (secondary)",
+     "M61 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-c4d0e7d6ef",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositLimitsTest#orderExampleOne",
+    "display_name": "CL-019 spec example: daily 100, weekly 300 -> weekly 100 accepted, weekly 99 refused with details",
+    "tags": [
+     "LIM-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositLimitsTest.java",
+    "line": 188
+   },
+   "requirement": "LIM-02",
+   "spec_quote": "LIM-02: \"returns `200` with a list of objects `{period, amount, used, remaining, pending}`, one per period that has a limit\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "Line 188 asserts Json.semanticEquals(before, after) on the whole limit list. semanticEquals compares array elements by index (Json.java:80-89), so the DAILY and WEEKLY items must come back in the same order in both reads. LIM-02 fixes what the list contains (one object per period that has a limit) but not the order of its items. Scenario: a service that follows the specification returns [DAILY, WEEKLY] at line 183 and [WEEKLY, DAILY] at line 188. Every current and pending value is unchanged, but the test fails. The other expectations agree with the specification: weekly 100 → 200 with amount 100 (LIM-04, LIM-06), and weekly 99 → 422 DEPOSIT_LIMIT_ORDER_VIOLATED with period WEEKLY, conflictingPeriod DAILY, conflictingAmount 100 (LIM-04, LIM-02).",
+   "expected_after_fix": "Show per period that the refusal changed nothing: the same set of periods is listed, and for each period the current amount and the pending value (amount and effectiveAt) equal those read before the refusal, whatever the order of the list items.",
+   "fix_scope": "expectation",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M24 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-276ffe33a7",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositLimitsTest#orderExampleTwo",
+    "display_name": "CL-020 spec example: daily 100 with pending 250, weekly 300 -> weekly 200 refused (conflict DAILY 250)",
+    "tags": [
+     "LIM-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositLimitsTest.java",
+    "line": 204
+   },
+   "requirement": "LIM-02",
+   "spec_quote": "LIM-02: \"returns `200` with a list of objects `{period, amount, used, remaining, pending}`, one per period that has a limit\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "Line 204 asserts Json.semanticEquals(before, after) on the whole limit list. semanticEquals compares array elements by index (Json.java:80-89), so the DAILY item (100, pending 250) and the WEEKLY item (300) must come back in the same order in both reads. LIM-02 does not fix the order of the list items. Scenario: a service that follows the specification returns [WEEKLY, DAILY] at line 199 and [DAILY, WEEKLY] at line 204, with all values unchanged; the test fails. The other expectations agree with the specification: daily 250 pending (LIM-07), and weekly 200 → 422 DEPOSIT_LIMIT_ORDER_VIOLATED with period WEEKLY, conflictingPeriod DAILY, conflictingAmount 250 (LIM-04 example).",
+   "expected_after_fix": "Show per period that the refusal changed nothing: the same set of periods is listed, and for each period the current amount and the pending value (amount and effectiveAt) equal those read before the refusal, whatever the order of the list items.",
+   "fix_scope": "expectation",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-4210ad84c4",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositTest#approvedDeposit",
+    "display_name": "CL-001 approved deposit: 200, balance + amount, one DEPOSIT record, one event, one provider call",
+    "tags": [
+     "DEP-01"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositTest.java",
+    "line": 49
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "The test only checks that there is at least one event, not exactly one. Events.awaitOne returns as soon as one DEPOSIT event of the player is in player-events, and no later assertion counts the player's DEPOSIT events. Witness: the service publishes the DEPOSIT event of this single deposit twice (two records, each with amount 125.50). awaitOne returns the first, line 50 passes on its amount, and the test passes although the deposit produced two events. The other claim points are observed: 200 (l.40), balance 0 -> 125.50 in the response and by GET (l.43, l.44), exactly one DEPOSIT record of 125.50 and nothing else in the journal (l.46-48), exactly one POST /payments (l.51).",
+   "expected_after_fix": "After the DEPOSIT event has arrived and a further quiet period of at least 1 s, the test must establish that player-events holds exactly one DEPOSIT event for this player, with amount equal by value to 125.50.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-569cdc1999",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositTest#outOfRangeRefused",
+    "display_name": "CL-004 deposit out of range: 422 DEPOSIT_AMOUNT_OUT_OF_RANGE, nothing changes, provider not called",
+    "tags": [
+     "DEP-02"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositTest.java",
+    "line": 79
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"player-events: types REGISTERED, DEPOSIT, WITHDRAWAL\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 79 reads the player's player-events count without waiting for the setup's events: REGISTERED from createPlayer and DEPOSIT from the funding deposit of 100. The specification gives no bound on when these become observable. Run: the service publishes each event 300 ms after its response. The snapshot is taken a few ms after the funding deposit returns, so it records 0 or 1 player-events instead of 2. During the 1 s quiet period of assertUnchanged (line 82) the late events arrive, the count no longer matches, and the test fails with 'unexpected player-events' although the refused deposit published nothing. This holds for both arguments.",
+   "expected_after_fix": "Before taking the baseline, the test must wait, with the standard event timeout, until the player's setup events (REGISTERED and the DEPOSIT of 100) have been collected. Then the comparison after the quiet period counts only events caused by the refused deposit.",
+   "fix_scope": "wait",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-927b90f572",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositTest#providerDecline",
+    "display_name": "CL-006 provider decline: 422 PAYMENT_DECLINED, nothing changes, key not consumed; 10000.00 approved",
+    "tags": [
+     "DEP-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositTest.java",
+    "line": 105
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"player-events: types REGISTERED, DEPOSIT, WITHDRAWAL\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 105 is taken right after fundedPlayer(\"50\"), without waiting for the player's REGISTERED event and the DEPOSIT event of 50. The specification gives no bound on when these become observable. Run: the service publishes them 300 ms after the responses. The baseline records fewer player-events than the setup produced. During the 1 s quiet period of assertUnchangedExceptProviderCalls (line 107) the late events arrive and the player-events count differs, so the test fails although the declined deposit published nothing.",
+   "expected_after_fix": "Before taking the baseline, the test must wait, with the standard event timeout, until the player's setup events (REGISTERED and the DEPOSIT of 50) have been collected. Then the comparison after the quiet period counts only events caused by the declined deposit.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-96633eb68f",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositTest#keyBeforeRange",
+    "display_name": "CL-009 order of checks: idempotency key (422 IDEMPOTENCY_KEY_REUSED) before amount range",
+    "tags": [
+     "DEP-05"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositTest.java",
+    "line": 138
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"player-events: types REGISTERED, DEPOSIT, WITHDRAWAL\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 138 is taken immediately after the 200 deposit of 100 (line 137) and createPlayer (line 135), without waiting for the player's REGISTERED and DEPOSIT events. The specification gives no bound on when these become observable. Run: the service publishes each event 300 ms after its response. The baseline counts 0 or 1 player-events. During the 1 s quiet period of assertUnchanged (line 140) the late events arrive and the count differs, so the test fails although the REUSED refusal published nothing.",
+   "expected_after_fix": "Before taking the baseline, the test must wait, with the standard event timeout, until the player's REGISTERED event and the DEPOSIT event of the first deposit have been collected. Then the comparison after the quiet period counts only events caused by the refused request.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M20 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-43745e122d",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "DepositTest#limitsBeforeProvider",
+    "display_name": "CL-011 order of checks: deposit limits before the provider (provider not called)",
+    "tags": [
+     "DEP-05",
+     "DEP-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/DepositTest.java",
+    "line": 161
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"player-events: types REGISTERED, DEPOSIT, WITHDRAWAL\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 161 is taken right after createPlayer (line 159) and one PUT limit request (line 160), without waiting for the player's REGISTERED event. The specification gives no bound on when this event becomes observable. Run: the service publishes REGISTERED 300 ms after the creation response. The baseline records 0 player-events. During the 1 s quiet period of assertUnchanged (line 164) the REGISTERED event arrives and the count becomes 1, so the test fails with 'unexpected player-events' although the limit refusal published nothing.",
+   "expected_after_fix": "Before taking the baseline, the test must wait, with the standard event timeout, until the player's REGISTERED event has been collected. Then the comparison after the quiet period counts only events caused by the refused deposit.",
+   "fix_scope": "wait",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M18 (primary)",
+     "M20 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-dbb8ab80fa",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "EventsTest#depositAndWithdrawalEvents",
+    "display_name": "CL-119 DEPOSIT and WITHDRAWAL carry all fields, the operation amount and the service-clock time",
+    "tags": [
+     "GEN-21"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/EventsTest.java",
+    "line": 31
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"Required fields: `eventId`, `type`, `playerId`, `amount`, `at`.\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "assertRequiredPlayerEventFields (called at line 59) requires eventId to be a JSON string (isTextual); GEN-21 fixes no type for eventId, so a service publishing a numeric eventId follows the specification and fails. Line 61 also parses `at` with Instant.parse (representation not fixed), and TestClock.ensureOffsetAtLeast (line 50) reads an `offset` field of GET /api/test/clock that section 10 does not specify. Amounts 80/30 and `at` within the service-clock bracket agree with GEN-21; the tag is defined and exercised.",
+   "expected_after_fix": "Require eventId only to be present, as GEN-21 states, without fixing its JSON type; check `at` as a service-clock time without assuming a representation the specification does not fix.",
+   "fix_scope": "expectation",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M10 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-293c1b4bf2",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "EventsTest#registeredEvent",
+    "display_name": "CL-118 REGISTERED in player-events with eventId, type, playerId, amount null, at",
+    "tags": [
+     "GEN-21"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/EventsTest.java",
+    "line": 31
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"Required fields: `eventId`, `type`, `playerId`, `amount`, `at`.\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "The class helper assertRequiredPlayerEventFields (called at line 40) requires eventId to be a JSON string (isTextual); GEN-21 only lists eventId as a required field and fixes no type, so a service that publishes a numeric eventId (e.g. 4711) follows the specification and fails. Line 43 also requires `at` to be an ISO-8601 instant string (Instant.parse), a representation the specification does not fix. The other expectations (type REGISTERED, playerId, amount null, field presence) agree with GEN-21; the tag is defined and exercised.",
+   "expected_after_fix": "Require eventId only to be present, as GEN-21 states, without fixing its JSON type; check `at` as a time without assuming a representation the specification does not fix.",
+   "fix_scope": "expectation",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-d410d2049f",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "EventsTest#registeredEvent",
+    "display_name": "CL-118 REGISTERED in player-events with eventId, type, playerId, amount null, at",
+    "tags": [
+     "GEN-21"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/EventsTest.java",
+    "line": 43
+   },
+   "requirement": "GEN-21",
+   "spec_quote": "GEN-21: \"`at` is the service-clock time of the operation\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "eventId (presence, line 40 via helper line 30), type (awaitOne filter, line 39), playerId (line 41) and amount null (line 42) are observed, but `at`, which GEN-21 fixes as the service-clock time of the operation, is only parsed as an ISO instant (line 43). Witness: the service publishes REGISTERED with `at` = real wall-clock time while the service clock is weeks ahead (or a constant such as 1970-01-01T00:00:00Z); the test passes. The test also never makes the service clock distinguishable from real time.",
+   "expected_after_fix": "With the service clock offset from real time, establish that `at` of the REGISTERED event is the service-clock time of the registration, i.e. lies between service-clock readings taken immediately before and after the player is created.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-079b23770b",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#betOutOfRange",
+    "display_name": "CL-057 bet out of range: 422 BET_AMOUNT_OUT_OF_RANGE with min/max, nothing changes, key free",
+    "tags": [
+     "SES-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 127
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: `DEPOSIT` in `player-events`\" (no delivery bound; SES-03: \"Unchanged: balance, journal, events\")",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) counts the player's player-events right after fundedPlayer returns. It does not wait for the setup's REGISTERED and DEPOSIT events, which the specification publishes asynchronously with no time bound. Failing run on a conforming service (e.g. one with an outbox publisher): the DEPOSIT event reaches Kafka 300 ms after the deposit response. The baseline, taken about 50 ms after that response, records only REGISTERED. The DEPOSIT arrives during the 1 s quiet period of assertUnchanged (l.130), the count goes from 1 to 2, and the test fails with 'unexpected player-events' although the refused start changed nothing. If the event arrives before the baseline, the same test passes, so the outcome depends on event latency.",
+   "expected_after_fix": "Take the 'nothing changes' baseline only after the new player's setup events (REGISTERED and DEPOSIT) have been observed, so that the comparison over the quiet period counts only events the refused session start could have caused.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-2322a8fd82",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#oneActiveSession",
+    "display_name": "CL-058 second start while ACTIVE: 409 ACTIVE_SESSION_EXISTS, nothing changes, key free",
+    "tags": [
+     "SES-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 143
+   },
+   "requirement": "SES-01",
+   "spec_quote": "SES-01: \"Event: `SESSION_STARTED` in `game-events`\" (no delivery bound; SES-04: \"Unchanged: balance, journal, events\")",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) is taken right after startOk (l.141). It does not wait for the first session's SESSION_STARTED event, nor for the setup's REGISTERED and DEPOSIT events, all of which are asynchronous with no bound. Failing run on a conforming service: SESSION_STARTED reaches the collector 200 ms after the 201. The baseline records 0 game-events, the event arrives during the 1 s quiet period of assertUnchanged (l.145), the count becomes 1, and the test fails with 'unexpected game-events' although the refused second start published nothing. The same race exists for the DEPOSIT event in player-events.",
+   "expected_after_fix": "Before taking the baseline, wait until the first session's SESSION_STARTED event and the setup's player events have been observed; only then does 'events unchanged' measure what the refused second start published.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-cfae795710",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#insufficientFunds",
+    "display_name": "CL-059 bet above balance: 422 INSUFFICIENT_FUNDS, nothing changes, key free",
+    "tags": [
+     "SES-05"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 158
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: `DEPOSIT` in `player-events`\" (no delivery bound; SES-05: \"Unchanged: balance, journal, events\")",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) counts the player's events right after fundedPlayer(\"20\") without waiting for the asynchronous REGISTERED and DEPOSIT events of the setup. Failing run on a conforming service: the DEPOSIT event reaches the collector 300 ms after the deposit response, which is after the baseline and within the 1 s quiet period of assertUnchanged (l.160). The player-events count rises from 1 to 2, and the test fails although the refused start changed nothing. If the event arrives earlier, the test passes.",
+   "expected_after_fix": "Take the 'nothing changes' baseline only after the new player's REGISTERED and DEPOSIT events have been observed, so that the quiet-period comparison covers only events of the refused session start.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-4aca01fe41",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#negativeWin",
+    "display_name": "CL-064 negative win -> 400 VALIDATION_ERROR with win in details; session and balance unchanged",
+    "tags": [
+     "SES-07"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 234
+   },
+   "requirement": "SES-01",
+   "spec_quote": "SES-01: \"Event: SESSION_STARTED in game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at L234 counts the player's game-events and player-events right after startOk, without waiting for the setup's SESSION_STARTED or the REGISTERED/DEPOSIT events of fundedPlayer. Run: the service publishes SESSION_STARTED 300 ms after the 201, which the spec allows (it sets no bound). The baseline then holds 0 game-events, the event arrives during the 1 s quiet period of assertUnchanged (L237), and the test fails with 'unexpected game-events' although the refused finish published nothing. The same happens with a late DEPOSIT in player-events.",
+   "expected_after_fix": "Before taking the baseline, wait (EVENT_TIMEOUT) until the setup's events have been received: SESSION_STARTED in game-events and the REGISTERED/DEPOSIT events in player-events. Then only events caused by the refused finish can change the counts.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M42 (primary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-89cbe10939",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#negativeWin",
+    "display_name": "CL-064 negative win -> 400 VALIDATION_ERROR with win in details; session and balance unchanged",
+    "tags": [
+     "SES-07"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 239
+   },
+   "requirement": "SES-07",
+   "spec_quote": "SES-07: \"A negative win is refused with 400 VALIDATION_ERROR, win in details\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "The claim point 'session unchanged' is checked only through status ACTIVE (L239) and winAmount 0 (L240). finishedAt, which is null before the refusal, and the other session fields are never compared. Witness: the service answers 400 VALIDATION_ERROR with details {win: ...}, leaves balance, journal and events alone and keeps status ACTIVE and winAmount 0, but writes finishedAt = now on the session. The test passes. Secondary, also E3: assertDetailsMention (L236) accepts any details value that contains the substring 'win', so details {field: 'winAmount'}, which names a different field, passes. Points that are observed: 400 VALIDATION_ERROR at L235; balance unchanged (Snapshot.assertUnchanged) at L237.",
+   "expected_after_fix": "After the refusal, GET /api/sessions/{id} must return the session exactly as it was before the request: status ACTIVE, winAmount 0, finishedAt null, same betAmount and startedAt. details must name the request field win itself.",
+   "fix_scope": "assertion",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M42 (primary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-2b1f77da22",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#finishTwice",
+    "display_name": "CL-066 finishing a FINISHED session -> 409 SESSION_NOT_ACTIVE; the win is not credited twice",
+    "tags": [
+     "SES-09"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 267
+   },
+   "requirement": "SES-07",
+   "spec_quote": "SES-07: \"Event: SESSION_FINISHED in game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at L267 counts the player's events right after finishOk, without waiting for the SESSION_FINISHED of that first finish (or for SESSION_STARTED, REGISTERED and DEPOSIT of the setup). Run: the service publishes SESSION_FINISHED 300 ms after the 200 of the first finish, which the spec allows. The baseline then holds only SESSION_STARTED, SESSION_FINISHED arrives during the 1 s quiet period of assertUnchanged (L270), and the test fails with 'unexpected game-events' although the two refused finishes published nothing.",
+   "expected_after_fix": "Before taking the baseline, wait (EVENT_TIMEOUT) until the SESSION_FINISHED of the first finish, and the setup's player-events, have been received. Then only events caused by the refused finishes can change the counts.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-ccbf6a3ce9",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "GameSessionTest#readSession",
+    "display_name": "CL-067 GET /api/sessions/{id} returns 200 with the current session state",
+    "tags": [
+     "SES-13"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/GameSessionTest.java",
+    "line": 293
+   },
+   "requirement": "SES-13",
+   "spec_quote": "SES-13: \"GET /api/sessions/{id} returns 200 with the session\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "After the finish, the 'current session state' from GET is checked only by status FINISHED (L293) and winAmount 3 (L294). finishedAt, which the finish sets, is never read from GET. playerId, game, id and winAmount before the finish are only checked for presence (L287). Witness: after the finish, GET /api/sessions/{id} returns status FINISHED and winAmount 3 but finishedAt null (or game 'roulette' for this slots session). The test passes. Points that are observed: 200 at L285; ACTIVE, betAmount 7 and the start's startedAt before the finish at L288-290.",
+   "expected_after_fix": "Each GET must return the session as it is at that moment. Before the finish: the session id, playerId of the player, game slots, betAmount 7, winAmount 0, status ACTIVE, the start's startedAt and finishedAt null. After the finish: status FINISHED, winAmount 3, finishedAt equal to the finish response's finishedAt, and the other fields unchanged.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-488c193428",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#missingKey",
+    "display_name": "CL-083 missing Idempotency-Key -> 400 IDEMPOTENCY_KEY_REQUIRED for deposit, withdrawal, session start",
+    "tags": [
+     "GEN-08"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 44
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 44 reads the player-events count right after fundedPlayer (createPlayer + deposit 100). It does not wait for the REGISTERED and DEPOSIT events, which have no delivery bound. Run: the funding DEPOSIT event reaches the collector 200 ms after the deposit response. That is after the baseline at line 44 (count 1) but inside the 1 s quiet period of assertUnchanged at line 48 (count 2). assertUnchanged fails with 'unexpected player-events: [DEPOSIT ...]' on a service that follows the spec, although the three refused requests published nothing.",
+   "expected_after_fix": "Take the baseline only after the setup's events (REGISTERED and the funding DEPOSIT) have been observed with the standard event wait. The negative check then compares only against events the refused requests could cause.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-e7c1703b4f",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#emptyKey",
+    "display_name": "CL-084 empty Idempotency-Key -> 400 IDEMPOTENCY_KEY_REQUIRED for deposit, withdrawal, session start",
+    "tags": [
+     "GEN-08"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 56
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 56 is taken right after fundedPlayer, with no wait for the REGISTERED and DEPOSIT events, which have no bound. Run: the funding DEPOSIT event arrives 200 ms after the deposit response, after the baseline (count 1) and before the re-read at line 60 (count 2). assertUnchanged reports 'unexpected player-events' and the test fails on a service that follows the spec.",
+   "expected_after_fix": "Wait for the setup's REGISTERED and DEPOSIT events with the standard event timeout before taking the baseline for the negative check.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-c11020fe34",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#keyTooLong",
+    "display_name": "CL-086 a key of 65 characters -> 400 IDEMPOTENCY_KEY_INVALID for deposit, withdrawal, session start",
+    "tags": [
+     "GEN-09"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 80
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 80 is taken right after fundedPlayer (line 78), with no wait for the REGISTERED and DEPOSIT events, which have no bound. Run: the funding DEPOSIT event reaches the collector 200 ms after the deposit response, after the baseline (count 1) and inside the 1 s quiet period of assertUnchanged at line 84 (count 2). The test fails with 'unexpected player-events' on a service that follows the spec.",
+   "expected_after_fix": "Take the baseline only after the setup's REGISTERED and DEPOSIT events have been observed with the standard event wait.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-808fa48ce9",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#keyNotPrintableAscii",
+    "display_name": "CL-087 non-printable or non-ASCII key (TAB, é) -> 400 IDEMPOTENCY_KEY_INVALID",
+    "tags": [
+     "GEN-09"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 92
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 92 is taken right after fundedPlayer, with no wait for the REGISTERED and DEPOSIT events, which have no bound. Run: the funding DEPOSIT event arrives 200 ms after the deposit response, after the baseline (count 1) and before the re-read at line 98 (count 2). assertUnchanged fails with 'unexpected player-events' on a service that follows the spec.",
+   "expected_after_fix": "Wait for the setup's REGISTERED and DEPOSIT events with the standard event timeout before taking the baseline.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-669b0875b2",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#keySharedAcrossOperations",
+    "display_name": "CL-088 one key space per player: deposit key reused for withdrawal/session, session key for deposit -> 422",
+    "tags": [
+     "GEN-10",
+     "GEN-13"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 112
+   },
+   "requirement": "SES-07",
+   "spec_quote": "SES-07: \"Event: SESSION_FINISHED in game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 112 is taken right after finishOk (line 111). There is no wait for SESSION_STARTED or SESSION_FINISHED in game-events, or for REGISTERED and the two DEPOSITs in player-events, and none of these events has a bound. Run: SESSION_FINISHED reaches the collector 150 ms after the finish response, after the baseline (game-events count 1) and inside the 1 s quiet period of assertUnchanged at line 117 (count 2). The test fails with 'unexpected game-events: [SESSION_FINISHED ...]' on a service that follows the spec.",
+   "expected_after_fix": "Take the baseline only after all setup events (REGISTERED, both DEPOSITs, SESSION_STARTED, SESSION_FINISHED) have been observed with the standard event wait. The negative check then counts only events caused by the refused requests.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-ce73ddadc2",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#amountComparedByValue",
+    "display_name": "CL-089 amounts are compared by value: 50 then 50.00 with one key is a replay",
+    "tags": [
+     "GEN-11"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 128
+   },
+   "requirement": "GEN-12",
+   "spec_quote": "GEN-12: \"The operation is not performed again: balance, journal and events do not change.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "In this scenario, 'is a replay' carries everything GEN-12 says: the same status and body plus Idempotent-Replayed: true (line 129), the balance unchanged (line 130, 50), the journal unchanged (line 131, one DEPOSIT record), and the events unchanged. Nothing checks player-events after the replay. Witness: the service answers the 50.00 request with 200, the original body and Idempotent-Replayed: true, and leaves the balance and the journal alone, but it publishes a second DEPOSIT event (amount 50) in player-events. The test passes. Secondary: the provider request journal is also not checked, so a second POST /payments ('the operation is not performed again') would go unnoticed.",
+   "expected_after_fix": "Besides the replayed status, body and header, the balance of 50 and the single DEPOSIT record, the test must show that the 50.00 request publishes no new event for the player in player-events. Use a baseline taken after the first deposit's events are observed, then a quiet period of at least 1 s. Preferably it also shows that no second POST /payments was made.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-62f8ce853c",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#sessionFingerprint",
+    "display_name": "CL-090 session start fingerprint: same game and bet -> replay; other game or bet -> 422 REUSED",
+    "tags": [
+     "GEN-11",
+     "GEN-13"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 143
+   },
+   "requirement": "SES-01",
+   "spec_quote": "SES-01: \"Event: SESSION_STARTED in game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) at line 143 is taken right after the session start (line 141). It does not wait for SESSION_STARTED in game-events, or for the funding REGISTERED and DEPOSIT in player-events, and none of these has a bound. Run: SESSION_STARTED arrives 200 ms after the 201 response, after the baseline (game-events count 0) and inside the 1 s quiet period of assertUnchanged at line 146 (count 1). The test fails with 'unexpected game-events: [SESSION_STARTED ...]' although both 422 refusals published nothing.",
+   "expected_after_fix": "Take the baseline only after SESSION_STARTED and the setup's player-events have been observed with the standard event wait.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-32c03e54cc",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#sessionFingerprint",
+    "display_name": "CL-090 session start fingerprint: same game and bet -> replay; other game or bet -> 422 REUSED",
+    "tags": [
+     "GEN-11",
+     "GEN-13"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 147
+   },
+   "requirement": "GEN-12",
+   "spec_quote": "GEN-12: \"The operation is not performed again: balance, journal and events do not change.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "The 422 points are observed: other game at line 144, other bet at line 145, both with status and code, and nothing changed at line 146. The point 'same game and bet -> replay' carries GEN-12: the same 201 and body plus the header, and balance, journal and events unchanged. Only status, body and header are checked (line 147). The Snapshot check at line 146 runs before the replay request is sent, so nothing observes the replay's effect. Witness: the service answers slots/5.00 with 201, the original body and Idempotent-Replayed: true, but it debits the bet a second time (balance 95 -> 90), writes a second BET record of 5 and publishes a second SESSION_STARTED. The test passes.",
+   "expected_after_fix": "Take a baseline before the slots/5.00 replay. After the replay, the test must show that the balance is still 95, the journal still holds one BET of 5, and game-events gets no second SESSION_STARTED during a quiet period of at least 1 s.",
+   "fix_scope": "assertion",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-87e29288cf",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#sessionStartReplay",
+    "display_name": "CL-093 session start replay: 201 same body + header; no second BET, no second event",
+    "tags": [
+     "GEN-12"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 191
+   },
+   "requirement": "GEN-24",
+   "spec_quote": "GEN-24: \"There is no ordering guarantee between player-events and game-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The test waits for one effect (SESSION_STARTED in game-events, line 190) and then reads another (the player-events count in Snapshot.of, line 191) that has its own delivery. Concrete run: the service sends game-events at once but flushes player-events from an outbox every ~1.5 s, which the spec allows (no ordering across topics, no delivery bound). The REGISTERED and DEPOSIT events of the funding (fundedPlayer, line 185) have not reached the collector when SESSION_STARTED arrives, so the baseline holds 0 player-events. They arrive during the 1 s quiet period, and assertUnchanged at line 193 fails with 'unexpected player-events' although the replay changed nothing.",
+   "expected_after_fix": "Before taking the baseline, also wait for the setup's own player-events (REGISTERED and the funding DEPOSIT) with the standard event timeout. Then the baseline contains every event the setup produced, and only the replay can change the counts.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-1ceaa80246",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#differentAmount",
+    "display_name": "CL-095 consumed key with a different amount (deposit, withdrawal) -> 422 IDEMPOTENCY_KEY_REUSED; nothing changes",
+    "tags": [
+     "GEN-13"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 237
+   },
+   "requirement": "GEN-13",
+   "spec_quote": "GEN-13: \"A consumed key with a different fingerprint (another amount, ...) is refused with 422 IDEMPOTENCY_KEY_REUSED. Nothing changes.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "Witness: the service answers 422 IDEMPOTENCY_KEY_REUSED to the deposits with the consumed key (lines 233, 234) but publishes a DEPOSIT event for the refused 200 deposit, or writes a DEPOSIT journal record, or sends POST /payments, without changing the balance. The snapshot 'before' (line 232) is never checked with assertUnchanged. The new baseline 'afterWithdrawal' taken at line 237 already contains the stray event or record, and line 241 compares only the balance, so the test passes. 'Nothing changes' is observed only for the withdrawal refusals (line 240). For the deposit refusals, the journal, events and provider calls are not observed; only the balance is (line 241). The 422 codes are observed at lines 233, 234, 238 and 239.",
+   "expected_after_fix": "For the deposit refusals with the consumed key (amounts 100.01 and 200), show that balance, journal and player events stay as they were before those refusals over a quiet period of at least 1 s and that no further payment request reaches the provider. Do this before the withdrawal is made, and keep the same check for the withdrawal refusals.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-1d0c3bda68",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#differentAmount",
+    "display_name": "CL-095 consumed key with a different amount (deposit, withdrawal) -> 422 IDEMPOTENCY_KEY_REUSED; nothing changes",
+    "tags": [
+     "GEN-13"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 237
+   },
+   "requirement": "WDR-01",
+   "spec_quote": "WDR-01: \"Event: WITHDRAWAL in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The baseline 'afterWithdrawal' (line 237) reads the player-events count a few milliseconds after the successful withdrawal at line 236, without waiting for its WITHDRAWAL event. Concrete run: the WITHDRAWAL event reaches the collector 200 ms after the 200 response (Kafka publish plus the collector's 100 ms poll; the spec gives no bound). The baseline misses it, the event arrives during the 1 s quiet period, and afterWithdrawal.assertUnchanged at line 240 fails with 'unexpected player-events: [WITHDRAWAL]' although the two refusals changed nothing. The REGISTERED and DEPOSIT events from lines 229-231 are never awaited either and can arrive in the same window.",
+   "expected_after_fix": "Before taking the baseline for the withdrawal refusals, wait with the standard event timeout until the WITHDRAWAL event of the successful withdrawal, and the earlier REGISTERED and DEPOSIT events, have been observed. Then the baseline contains every event of the preceding successful operations.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-1b89d4a871",
+   "check": "CHK-5",
+   "kind": "H4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#depositInProgress",
+    "display_name": "CL-096 deposit with the same key while the first is processed -> 409 IDEMPOTENCY_KEY_IN_PROGRESS",
+    "tags": [
+     "GEN-14"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 255
+   },
+   "requirement": "GEN-14",
+   "spec_quote": "GEN-14: \"A request whose key belongs to a request of the same player that is still being processed is refused with 409 IDEMPOTENCY_KEY_IN_PROGRESS.\"",
+   "problem": "Unenforced ordering or timing: the outcome depends on a race or on a real-time duration the test assumes but does not enforce.",
+   "evidence": "In inProgress, a fixed 800 ms sleep (line 255) is assumed to outlast the moment the first deposit, started on a ForkJoinPool thread at line 253, reaches the service and holds the key; nothing enforces this. Concrete run: on a loaded runner the async thread or the first request's path to the key check takes more than 800 ms (thread start, GC pause, slow player lookup). The 'second' deposit (same key, 100) reaches the service first and becomes the operation in progress, answered 200 after the 2.5 s provider delay. The async 'first' gets 409, and the 'third' (200), sent only after the second returned, gets 422 IDEMPOTENCY_KEY_REUSED. A system that follows GEN-14 then fails the test at line 262.",
+   "expected_after_fix": "Send the repeated same-key deposits only after the first deposit is shown to be in progress at the service, for example by its payment request appearing in the provider request journal while the provider delay holds it. Keep the delay long enough that both repeats are answered before the first completes.",
+   "fix_scope": "wait",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H4"
+  },
+  {
+   "id": "F-cd26e1a2e0",
+   "check": "CHK-5",
+   "kind": "H4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "IdempotencyKeyTest#withdrawalInProgress",
+    "display_name": "CL-097 withdrawal with the same key while the first is processed -> 409 IDEMPOTENCY_KEY_IN_PROGRESS",
+    "tags": [
+     "GEN-14"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/IdempotencyKeyTest.java",
+    "line": 255
+   },
+   "requirement": "GEN-14",
+   "spec_quote": "GEN-14: \"A request whose key belongs to a request of the same player that is still being processed is refused with 409 IDEMPOTENCY_KEY_IN_PROGRESS.\"",
+   "problem": "Unenforced ordering or timing: the outcome depends on a race or on a real-time duration the test assumes but does not enforce.",
+   "evidence": "In inProgress, a fixed 800 ms sleep (line 255) is assumed to outlast the moment the first withdrawal, started on a ForkJoinPool thread at line 253, reaches the service and holds the key; nothing enforces this. Concrete run: the async thread or the first request's processing up to the key check is delayed by more than 800 ms (thread start, GC pause, slow player lookup). The 'second' withdrawal (same key, 100) is processed first and answered 200 after the 2.5 s payout delay. The async 'first' gets 409, and the 'third' (200), sent after the second returned, gets 422 IDEMPOTENCY_KEY_REUSED. A system that follows GEN-14 then fails the test at line 262.",
+   "expected_after_fix": "Send the repeated same-key withdrawals only after the first withdrawal is shown to be in progress at the service, for example by its payout request appearing in the provider request journal while the provider delay holds it. Keep the delay long enough that both repeats are answered before the first completes.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H4"
+  },
+  {
+   "id": "F-8ddf69a08a",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "InvariantTest#mixedFlow",
+    "display_name": "CL-123 balance equals the journal after deposit, win, loss, refund and withdrawal",
+    "tags": [
+     "GEN-25"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/InvariantTest.java",
+    "line": 41
+   },
+   "requirement": "SES-11",
+   "spec_quote": "SES-11: \"All of the above is observable through REST, the journal and Kafka no later than 5 seconds of real time after the service clock passes startedAt + 60 seconds\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "SessionTimingTest.expire (l.39) waits only until the session status is EXPIRED. The test then reads the balance and the journal (l.40-42), but the refund has its own SES-11 guarantee: up to 5 s after the clock passes startedAt+60 s. Run: the service marks the session EXPIRED 0.2 s after the clock advance and applies the refund (balance +30 and the REFUND record, atomically) 2 s later, within the bound. expire returns at about 0.4 s, and the withdrawal of 100 succeeds on a balance of 465. l.41 then reads 365 instead of 395 and the test fails on a correct service.",
+   "expected_after_fix": "After the clock passes startedAt+60 s, wait for the refund itself (the balance credited, or the REFUND record present) up to the SES-11 bound of 5 s before the withdrawal and the balance/journal assertions.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M14 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-7324ee8c77",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardPeriodTest#newPeriodRecomputed",
+    "display_name": "CL-081 at a period boundary the top is recomputed within 30 s (empty) and sent on the WebSocket",
+    "tags": [
+     "LDB-02",
+     "LDB-07",
+     "LDB-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardPeriodTest.java",
+    "line": 91
+   },
+   "requirement": "LDB-07",
+   "spec_quote": "LDB-07: \"If the new top differs from the last top sent, the message (LDB-06) is sent within the same 30 seconds.\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "Claim points: GET empty within 30 s (lines 86-88); a message with the new empty top within the same 30 s (lines 91-93). The WebSocket predicate b.path(\"top\").isEmpty() is also true for a message with no top field (MissingNode), with \"top\": null or {}, and the message type is never checked. Witness: at the boundary the service sends {\"type\":\"PERIOD_STARTED\"} without a top and never a LEADERBOARD_UPDATED with the empty list; the predicate matches and assertNotNull passes. Also line 88: JsonNode.isEmpty() accepts a 200 whose body is empty, null or {} instead of an empty list. And the measured ms (line 87) is never asserted, so a GET that only turns empty at the poll after the deadline (~30.25 s) is accepted.",
+   "expected_after_fix": "After the boundary, GET must return an empty JSON list within 30 s, and within the same 30 s a LEADERBOARD_UPDATED message must arrive whose top is an empty list.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M52 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-303aa810dc",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardPeriodTest#finishedAtDecides",
+    "display_name": "CL-082 a session finished after the boundary counts in the new period; net <= 0 is not listed",
+    "tags": [
+     "LDB-02",
+     "LDB-03",
+     "LDB-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardPeriodTest.java",
+    "line": 115
+   },
+   "requirement": "LDB-04",
+   "spec_quote": "LDB-04: \"Only players with netResult > 0 are listed.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "Counts in the new period: observed, C is listed with netResult 100 (lines 113-114). Net <= 0 not listed: D (net 0) and E (net -5) must be absent. This is checked only by top.size() == 1 (line 115) on the first GET that shows C (line 111). That GET can come a few hundred ms after D's and E's finishes, with no quiet period. Witness: the service also lists players with netResult <= 0 and applies the finish updates of different players in no particular order (no cross-player ordering, GEN-24). C's update lands first, the first read shows [C], size 1 passes, and D and E appear a moment later.",
+   "expected_after_fix": "The absence of D and E must be established on a top listing C at a time when their finishes are guaranteed to be reflected, for example after a quiet period following the moment C appears.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-6adf8ef71d",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardTest#topFormat",
+    "display_name": "CL-074 GET /api/leaderboard: 200, at most 10 {playerId, username, netResult}, descending, positive",
+    "tags": [
+     "LDB-01",
+     "LDB-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardTest.java",
+    "line": 68
+   },
+   "requirement": "LDB-03",
+   "spec_quote": "LDB-03: \"A player's netResult is the sum of win − bet over the player's FINISHED sessions\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "Claim points and observers: 200 (Api.leaderboard, Api.java:220), at most 10 (line 64), fields present (line 67), descending (line 73), positive (line 71), username of the winner (line 90). netResult is a field the specification fixes: for the winner p (one session, bet 1, win W) LDB-03 gives W - 1. The test only checks that netResult is present, is a number and is > 0 (lines 67-71). p's entry is compared on username only (line 90). Witness: the service reports netResult = win without subtracting the bet (W for p), or any other positive number. p is still listed, numeric, positive and first, so the test passes.",
+   "expected_after_fix": "Besides the size, field, order and positivity checks, the entry of the player the test creates must carry netResult equal to win − bet of its one session (W − 1) in the current period.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M49 (primary)",
+     "M52 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-e74aabfae0",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardTest#messageOnNewEntry",
+    "display_name": "CL-077 a new entry in the top sends LEADERBOARD_UPDATED within 30 s; its top equals GET",
+    "tags": [
+     "LDB-06"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardTest.java",
+    "line": 68
+   },
+   "requirement": "LDB-06",
+   "spec_quote": "LDB-06: \"sends {\\\"type\\\": \\\"LEADERBOARD_UPDATED\\\", \\\"top\\\": [...]}, where top has the format of LDB-01\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "LDB-06 is defined and exercised. assertTopFormat on the message's top (call at line 149, check at lines 68-69) requires netResult to be a JSON number. LDB-06 only says top has the format of LDB-01, which fixes fields, not JSON types. A service sending netResult as a numeric string follows the specification and fails. Also L2: the claim's bound 'within 30 s' is LDB-05 ('on the WebSocket (LDB-06) no later than 30 seconds after the finish response'), which is not among the tags. Type LEADERBOARD_UPDATED, a message for the new top entry, and message top = GET agree with LDB-06.",
+   "expected_after_fix": "The message's top must have entries with playerId, username and netResult, with netResult judged by value and no JSON number type required. The 30 s bound belongs to LDB-05, which must be tagged.",
+   "fix_scope": "expectation",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M53 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-533c02dce4",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardTest#topFormat",
+    "display_name": "CL-074 GET /api/leaderboard: 200, at most 10 {playerId, username, netResult}, descending, positive",
+    "tags": [
+     "LDB-01",
+     "LDB-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardTest.java",
+    "line": 68
+   },
+   "requirement": "LDB-01",
+   "spec_quote": "LDB-01: \"a list of at most 10 entries {playerId, username, netResult}, sorted by netResult in descending order\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "Both tags are defined, and the GET after the winner's finish exercises them. assertTopFormat (called at line 87) requires netResult to be a JSON number at lines 68-69. LDB-01 only names the fields {playerId, username, netResult}. The specification fixes JSON number types only for request fields (GEN-03) and event amounts (GEN-23). A service returning \"netResult\": \"1999.00\" follows the specification and fails the test; line 70 also reads a text node as 0, so the positivity check fails as well. The playerId integer check is arguably covered by 'numeric id'. Minor: line 90 takes the expected username from GET /api/players/{id}, whose fields the specification does not list beyond balance. The other expectations agree with LDB-01/LDB-04: 200, at most 10 entries, descending with ties allowed, only positive netResult, the winner (net above the current maximum) listed.",
+   "expected_after_fix": "Entries must have playerId, username and netResult, with netResult judged by its value (order, positivity). The JSON type of netResult is not a requirement of the specification.",
+   "fix_scope": "expectation",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M49 (primary)",
+     "M52 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-87fb5a5bfc",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardTest#netResult",
+    "display_name": "CL-075 netResult = sum(win - bet) over FINISHED sessions; ACTIVE and EXPIRED are not counted",
+    "tags": [
+     "LDB-03",
+     "SES-12"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardTest.java",
+    "line": 106
+   },
+   "requirement": "LDB-03",
+   "spec_quote": "LDB-03: \"ACTIVE and EXPIRED sessions are not counted.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "Sum over FINISHED sessions: observed by the exact equality W - 30 (line 112). EXPIRED not counted and ACTIVE not counted: checked only through the same equality, read at the first poll that matches (lines 106-109). That read can come right after startOk(40) and well under 1 s after the expiry, with no quiet period. Witness: the service counts ACTIVE and EXPIRED sessions with winAmount 0 (-30, -40) but recomputes a player's netResult only when one of their sessions finishes, plus a periodic refresh within 30 s. After the win-0 finish the top shows W - 30, awaitTop's first read after the 40 bet matches, and the test passes. The next refresh shows W - 100.",
+   "expected_after_fix": "Once the EXPIRED and the ACTIVE session exist, the test must show that netResult is still W − 30 after a leaderboard update following them has become observable: a quiet period after the last session change, or a later reflected finish of the same player whose expected sum still excludes them.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M51 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-c6032b943a",
+   "check": "CHK-5",
+   "kind": "H4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardTest#freshness",
+    "display_name": "CL-076 a finished session is reflected in GET /api/leaderboard within 30 s",
+    "tags": [
+     "LDB-05"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardTest.java",
+    "line": 130
+   },
+   "requirement": "LDB-05",
+   "spec_quote": "LDB-05: \"no later than 30 seconds after the finish response\"",
+   "problem": "Unenforced ordering or timing: the outcome depends on a race or on a real-time duration the test assumes but does not enforce.",
+   "evidence": "Line 130 asserts that the GET that first lists the player returned within 30000 ms of the finish response. Leaderboard.awaitTop only polls every 250 ms, and each poll adds the request time. A service that follows LDB-05 and reflects the session at 29.9 s is seen only by the next poll, which returns at ~30.15-30.3 s, so ms > 30000 and the test fails. The test even waits 31 s, but its threshold has 0 ms margin to the 30 s bound against a measurement that overshoots by up to ~250 ms plus latency.",
+   "expected_after_fix": "The timing judgement must allow for polling granularity and request latency, so that a reflection at any moment up to 30 s always passes. For example, judge by when the matching request was sent, or keep a margin of at least 500 ms.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H4"
+  },
+  {
+   "id": "F-4cfbe5cb44",
+   "check": "CHK-3A",
+   "kind": "L2",
+   "severity": "low",
+   "target": {
+    "type": "test",
+    "test": "LeaderboardTest#consecutiveMessagesDiffer",
+    "display_name": "CL-080 no two consecutive messages carry the same top",
+    "tags": [
+     "LDB-06"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/LeaderboardTest.java",
+    "line": 200
+   },
+   "requirement": "LDB-06",
+   "spec_quote": "LDB-06: \"A message is sent if and only if the top differs from the last top sent\"",
+   "problem": "A tag the test does not exercise, or the requirement governing the claim is not tagged.",
+   "evidence": "LDB-06 is defined, but the test sends no request of its own. It only reads the messages the class socket recorded during earlier tests (line 200), so it exercises no situation governed by LDB-06. The expectation itself (consecutive messages differ) agrees with LDB-06.",
+   "expected_after_fix": "The test must itself cause top changes and actions that leave the top unchanged, then show that consecutive messages received during its own actions never repeat a top.",
+   "fix_scope": "tag",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-b43f7567f8",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "PaymentProviderTest#depositTimeout",
+    "display_name": "CL-114 deposit, provider slower than 5 s: 504 PAYMENT_TIMEOUT within 6 s; nothing changes; key free",
+    "tags": [
+     "GEN-18",
+     "GEN-19"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/PaymentProviderTest.java",
+    "line": 92
+   },
+   "requirement": "GEN-19",
+   "spec_quote": "GEN-19: \"After a 504 PAYMENT_TIMEOUT, balance, journal and events do not change\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The baseline Snapshot.of(p) at line 92 counts the player's player-events right after createPlayer and the setup deposit in fundedPlayer (line 90). It does not wait for their REGISTERED and DEPOSIT events, and the specification gives event delivery no bound. Failing run: the setup deposit returns 200 and its DEPOSIT event reaches the collector 50 ms later (for example via an outbox publisher). The snapshot is taken about 15 ms after the response and records 1 player-event. At line 109, about 9 s later, the player has 2 player-events, so assertUnchangedExceptProviderCalls fails with 'unexpected player-events' even though the timed-out deposit changed nothing. Secondary (H4): the 6 s bound at line 105 is timed from line 94, before the stub admin call at line 96, and has no margin. A service that answers 5.95 s after the deposit is sent fails whenever the admin call takes more than 50 ms.",
+   "expected_after_fix": "Take the events baseline only after the setup's REGISTERED and DEPOSIT events for the player have been observed (awaited with the standard event timeout), so that the comparison after the timeout counts only events caused by the timed-out request. Measure the 6 s response time from the moment the deposit request is sent, after the stub delay is already in place.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-95517c5402",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "PaymentProviderTest#withdrawalTimeout",
+    "display_name": "CL-115 withdrawal, provider slower than 5 s: 504 PAYMENT_TIMEOUT within 6 s; nothing changes; key free",
+    "tags": [
+     "GEN-18",
+     "GEN-19"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/PaymentProviderTest.java",
+    "line": 92
+   },
+   "requirement": "GEN-19",
+   "spec_quote": "GEN-19: \"After a 504 PAYMENT_TIMEOUT, balance, journal and events do not change\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The baseline Snapshot.of(p) at line 92 counts the player's player-events right after createPlayer and the setup deposit of 200 in fundedPlayer (line 90). It does not wait for their REGISTERED and DEPOSIT events, and the specification gives event delivery no bound. Failing run: the setup deposit returns 200 and its DEPOSIT event reaches the collector 50 ms later. The snapshot, taken about 15 ms after the response, records 1 player-event. At line 109, about 9 s later, the player has 2 player-events, so assertUnchangedExceptProviderCalls fails with 'unexpected player-events' even though the timed-out withdrawal changed nothing. Secondary (H4): the 6 s bound at line 105 is timed from line 94, before the stub admin call at line 96, and has no margin. A service that answers 5.95 s after the withdrawal is sent fails whenever the admin call takes more than 50 ms.",
+   "expected_after_fix": "Take the events baseline only after the setup's REGISTERED and DEPOSIT events for the player have been observed (awaited with the standard event timeout), so that the comparison after the timeout counts only events caused by the timed-out withdrawal. Measure the 6 s response time from the moment the withdrawal request is sent, after the stub delay is already in place.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-e0a1ab2f79",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "PaymentProviderTest#depositUnreachable",
+    "display_name": "CL-116 deposit, provider unreachable: 502 PAYMENT_UNAVAILABLE; nothing changes; key free",
+    "tags": [
+     "GEN-20"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/PaymentProviderTest.java",
+    "line": 141
+   },
+   "requirement": "GEN-20",
+   "spec_quote": "GEN-20: \"Balance, journal and events do not change; the key is not consumed.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The baseline Snapshot.of(p) at line 141 counts the player's player-events right after createPlayer and the setup deposit in fundedPlayer (line 139). It does not wait for their REGISTERED and DEPOSIT events, and the specification gives event delivery no bound. Failing run: the setup deposit returns 200 and its DEPOSIT event reaches the collector 300 ms later. The snapshot, taken about 15 ms after the response, records 1 player-event. The 502 arrives at once, and after the 1 s quiet period at line 150 the player has 2 player-events, so assertUnchangedExceptProviderCalls fails with 'unexpected player-events' even though the refused deposit changed nothing. The fault mapping itself is restored in finally (line 147).",
+   "expected_after_fix": "Take the events baseline only after the setup's REGISTERED and DEPOSIT events for the player have been observed (awaited with the standard event timeout), so that the quiet-period comparison after the 502 counts only events caused by the refused deposit.",
+   "fix_scope": "wait",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-5fad346e06",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "PaymentProviderTest#withdrawalUnreachable",
+    "display_name": "CL-117 withdrawal, provider unreachable: 502 PAYMENT_UNAVAILABLE; nothing changes; key free",
+    "tags": [
+     "GEN-20"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/PaymentProviderTest.java",
+    "line": 141
+   },
+   "requirement": "GEN-20",
+   "spec_quote": "GEN-20: \"Balance, journal and events do not change; the key is not consumed.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The baseline Snapshot.of(p) at line 141 counts the player's player-events right after createPlayer and the setup deposit of 200 in fundedPlayer (line 139). It does not wait for their REGISTERED and DEPOSIT events, and the specification gives event delivery no bound. Failing run: the setup deposit's DEPOSIT event reaches the collector 300 ms after the 200. The snapshot, taken about 15 ms after the response, records 1 player-event. The 502 to the withdrawal arrives at once, and after the 1 s quiet period at line 150 the player has 2 player-events, so assertUnchangedExceptProviderCalls fails with 'unexpected player-events' even though the refused withdrawal changed nothing. The fault mapping itself is restored in finally (line 147).",
+   "expected_after_fix": "Take the events baseline only after the setup's REGISTERED and DEPOSIT events for the player have been observed (awaited with the standard event timeout), so that the quiet-period comparison after the 502 counts only events caused by the refused withdrawal.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-1f0d111f37",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#zeroAndNegativeAmounts",
+    "display_name": "CL-132 zero and negative amounts are refused with the range error; the balance cannot be manipulated",
+    "tags": [
+     "DEP-02",
+     "WDR-02",
+     "SES-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 77
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.77) counts p's events immediately after fundedPlayer, without waiting for the setup's REGISTERED and DEPOSIT events. The spec gives no latency bound for them. Run: the funding DEPOSIT event reaches the collector 300 ms after the deposit response, so the snapshot counts 1 player-event (REGISTERED). The nine refusals publish nothing. After the 1 s quiet period, assertUnchanged (l.83) counts 2 and fails with 'unexpected player-events: [DEPOSIT ...]' on a correct service. If the event arrives before l.77, the same test passes.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's setup events (REGISTERED and the funding DEPOSIT) are collected. The unchanged check then counts only events caused by the refusals.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M34 (secondary)",
+     "M39 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-b492b9bcfd",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#zeroAndNegativeAmounts",
+    "display_name": "CL-132 zero and negative amounts are refused with the range error; the balance cannot be manipulated",
+    "tags": [
+     "DEP-02",
+     "WDR-02",
+     "SES-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 83
+   },
+   "requirement": "WDR-02",
+   "spec_quote": "WDR-02: \"Unchanged: balance, journal, events. The provider is not called.\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "The range errors are asserted per request (l.79-81), but 'the balance cannot be manipulated' is observed only once, after all nine refusals (l.83). The deposit and the withdrawal of the same amount are mirror operations, so their effects can cancel. Witness: the service applies the requested amount to the balance before the range check and does not undo it on refusal: deposit +amount, withdrawal -amount, no journal record, no event, no provider call. The session start checks the range first. Every response is still the asserted 422 code. Deposit -100 takes the balance to 0 and withdrawal -100 brings it back to 100; -0.01 does the same. The final balance is 100 and the journal, events and provider journal are unchanged, so Snapshot.assertUnchanged passes. Yet a refused withdrawal of -100 sent on its own credits the player 100.",
+   "expected_after_fix": "Show that each refused request (deposit, withdrawal and bet of 0, -100 and -0.01) leaves the balance at its value before that request. Compare after every refusal, not only once after a sequence whose effects can cancel.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M34 (secondary)",
+     "M39 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-351f90efb4",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#hugeAmounts",
+    "display_name": "CL-133 huge amounts are refused with the range error, never 500",
+    "tags": [
+     "DEP-02",
+     "WDR-02",
+     "SES-03",
+     "LIM-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 94
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.94) counts p's events right after fundedPlayer, without waiting for the setup's REGISTERED and DEPOSIT events, which have no latency bound. Run: the funding DEPOSIT event arrives 300 ms after the deposit response, so the baseline counts 1 player-event. The four refusals publish nothing. assertUnchanged (l.99) counts 2 after its 1 s quiet period and fails with 'unexpected player-events' on a correct service. The outcome depends on event latency.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's setup events (REGISTERED and the funding DEPOSIT) are collected.",
+   "fix_scope": "wait",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M23 (secondary)",
+     "M34 (secondary)",
+     "M39 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-3423d209e9",
+   "check": "CHK-3A",
+   "kind": "L2",
+   "severity": "low",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#nonIntegerPlayerId",
+    "display_name": "CL-136 a non-integer playerId (N.5) is refused, never truncated to player N",
+    "tags": [
+     "GEN-03",
+     "GEN-07"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 116
+   },
+   "requirement": "GEN-03",
+   "spec_quote": "GEN-03: \"The numeric request fields amount (deposit, withdrawal, deposit limit), bet, win and playerId must be JSON numbers.\"",
+   "problem": "A tag the test does not exercise, or the requirement governing the claim is not tagged.",
+   "evidence": "Tag GEN-03 is not exercised. GEN-03 governs numeric fields sent as JSON strings, but here playerId is the JSON number N.5, so GEN-03's situation is not set up and GEN-03 does not determine the outcome. GEN-07 is exercised, because no player has the id N.5. The spec does not say whether a non-integer playerId is a format error (400 VALIDATION_ERROR) or the id of a nonexistent player (GEN-07: 404 NOT_FOUND). The assertion accepts either, each with its matching code, and the snapshot (nothing changes) holds under both readings, so there is no L3.",
+   "expected_after_fix": "Tag only requirements whose situation the test sets up: GEN-07 (a request for a player that does not exist). Either drop GEN-03, or add a request that sends playerId as a JSON string and expects 400 VALIDATION_ERROR with playerId in details.",
+   "fix_scope": "tag",
+   "audit": "agree",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-9de8647772",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#nonIntegerPlayerId",
+    "display_name": "CL-136 a non-integer playerId (N.5) is refused, never truncated to player N",
+    "tags": [
+     "GEN-03",
+     "GEN-07"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 121
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.121) counts p's events right after fundedPlayer, without waiting for the setup's REGISTERED and DEPOSIT events, which have no latency bound. Run: the funding DEPOSIT event reaches the collector 300 ms after the deposit response, so the baseline counts 1 player-event. The refused session start publishes nothing. assertUnchanged (l.127) counts 2 after the 1 s quiet period and fails with 'unexpected player-events' on a correct service.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's setup events (REGISTERED and the funding DEPOSIT) are collected.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-15a985d1e9",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#noInternalsDisclosed",
+    "display_name": "CL-135 error responses (also for malformed JSON) do not disclose internals",
+    "tags": [
+     "GEN-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 153
+   },
+   "requirement": "GEN-04",
+   "spec_quote": "GEN-04: \"a JSON object with a machine-readable code and a message; some also carry details\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "The disclosure check only rejects three top-level field names (l.151) and scans only the text of message and details (l.153). Witness: for the body 'not json' (l.140) the service answers 400 {\"code\":\"VALIDATION_ERROR\",\"message\":\"Malformed request body\",\"cause\":\"com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'not' at [Source: (PushbackInputStream); line: 1, column: 4]\"}. The parser exception, its class and the source position are disclosed in the field 'cause'. That field is not in the name list and is not scanned, so the test passes. Fields such as 'error', 'path' or 'debug' with exception text pass the same way on any of the six errors.",
+   "expected_after_fix": "For every error response, including both malformed-JSON ones, show that no part of the body (every field and value, not only message and details, and not only the absence of three named fields) carries internal details.",
+   "fix_scope": "assertion",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M04 (primary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-b3949173e9",
+   "check": "CHK-3A",
+   "kind": "L4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SecurityTest#noInternalsDisclosed",
+    "display_name": "CL-135 error responses (also for malformed JSON) do not disclose internals",
+    "tags": [
+     "GEN-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SecurityTest.java",
+    "line": 153
+   },
+   "requirement": "GEN-04",
+   "spec_quote": "GEN-04: \"a JSON object with a machine-readable code and a message; some also carry details\"",
+   "problem": "Unspecified expectation: the assertion requires something the specification leaves open.",
+   "evidence": "The spec has no requirement about disclosing internals. GEN-04 only fixes a JSON object with code and message, with optional details, and leaves the message text open. A spec-following service can answer the deposit with amount \"ten\" (l.141) with 400 {\"code\":\"VALIDATION_ERROR\",\"message\":\"Cannot deserialize value of type java.math.BigDecimal from String\",\"details\":{\"amount\":\"must be a JSON number\"}}. That body fails l.153 on 'java.', and a message containing 'exception' or 'sql' fails the same way. l.151 also requires that the fields 'trace', 'exception' and 'stackTrace' are absent, which GEN-04 does not forbid (also L4). GEN-04 itself is exercised by the six error requests.",
+   "expected_after_fix": "Assert only what GEN-04 and the governing rules fix for these errors: a JSON object with the specified code (VALIDATION_ERROR / BAD_REQUEST / NOT_FOUND) and a message. Non-disclosure of internals is not a specification requirement, so no expectation on the message text or on extra fields can be derived from the spec.",
+   "fix_scope": "expectation",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M04 (primary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-cc5efca8b0",
+   "check": "CHK-1",
+   "kind": "E4",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SessionTimingTest#finishAtDeadlineRefused",
+    "display_name": "CL-070 finish at startedAt + 60 s -> 409 SESSION_NOT_ACTIVE; the win is not credited",
+    "tags": [
+     "SES-10"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SessionTimingTest.java",
+    "line": 76
+   },
+   "requirement": "SES-10",
+   "spec_quote": "SES-10: \"At startedAt + 60 seconds or later it is refused with 409 SESSION_NOT_ACTIVE\"",
+   "problem": "Claim point not observed: a point the claim names has no assertion, or only a negative check that is too short.",
+   "evidence": "'The win is not credited' is checked only through the journal (no WIN record, L76), an immediate event check (L77) and status not FINISHED (L78). The balance is never read. Witness: the service answers 409 SESSION_NOT_ACTIVE but adds the win of 50 to the balance without writing a WIN record (balance 140, or 150 after the refund, instead of 90 or 100). The test passes. Secondary, also E4: the 'no SESSION_FINISHED' check at L77 runs right after the response with no 1 s quiet period, so a SESSION_FINISHED published a few hundred ms later is not seen. Also, winAmount 50 written to the session is not checked. 409 SESSION_NOT_ACTIVE is observed at L75.",
+   "expected_after_fix": "After the refusal the balance must not include the win: it is 90, or 100 once the expiry has refunded the bet. There must be no WIN record, the session must show neither FINISHED nor winAmount 50, and no SESSION_FINISHED may arrive within a quiet period of at least 1 s.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M45 (secondary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-023792b2ed",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SessionTimingTest#expiry",
+    "display_name": "CL-071 expiry within 5 s: EXPIRED, finishedAt null, bet refunded, one REFUND, SESSION_EXPIRED",
+    "tags": [
+     "SES-11",
+     "GEN-21"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SessionTimingTest.java",
+    "line": 103
+   },
+   "requirement": "SES-11",
+   "spec_quote": "SES-11: \"All of the above is observable through REST, the journal and Kafka no later than 5 seconds of real time after the service clock passes startedAt + 60 seconds\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The test waits only until the status reads EXPIRED (L93-99) and then immediately reads the journal (L103) and the balance (L106). SES-11 gives the REFUND record and the refunded balance their own 5 s bound, not a guarantee that they appear together with the status. Run: after the advance, the session reads EXPIRED at 0.8 s, and the REFUND record and balance update are committed at 2 s, still within SES-11. The test reads the journal at about 0.8 s, finds 0 REFUND records and fails at L104 (or reads balance 75 at L106).",
+   "expected_after_fix": "Poll each expiry effect separately (status, REFUND record, balance, SESSION_EXPIRED) until it is observed or until 5 s after the clock passed startedAt + 60 s, and assert it only then.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M10 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-bee3598845",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SessionTimingTest#expiry",
+    "display_name": "CL-071 expiry within 5 s: EXPIRED, finishedAt null, bet refunded, one REFUND, SESSION_EXPIRED",
+    "tags": [
+     "SES-11",
+     "GEN-21"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SessionTimingTest.java",
+    "line": 107
+   },
+   "requirement": "SES-11",
+   "spec_quote": "SES-11: \"observable through REST, the journal and Kafka no later than 5 seconds of real time after the service clock passes startedAt + 60 seconds\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "The 5 s bound is not enforced for SESSION_EXPIRED. awaitOne at L107 waits until limit + 200 ms, and limit (L91) is set only after the advance response returns, so an event about 5.2 s after the clock passed startedAt + 60 s is still accepted. Witness: the service sets EXPIRED, writes the REFUND and refunds the balance within 1 s, but publishes SESSION_EXPIRED 5.15 s after the clock passed the deadline. The test passes. Points that are observed: EXPIRED within the window at L99; finishedAt null at L100; one REFUND of 25 at L104-105; balance 100 at L106.",
+   "expected_after_fix": "SESSION_EXPIRED, like every other expiry effect, must be observed no later than 5 s of real time after the service clock passed startedAt + 60 s (counted from the advance request), with no extra slack.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M10 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-cf9df07d41",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SessionTimingTest#finishExpired",
+    "display_name": "CL-072 finishing an EXPIRED session -> 409 SESSION_NOT_ACTIVE; nothing changes",
+    "tags": [
+     "SES-09"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SessionTimingTest.java",
+    "line": 124
+   },
+   "requirement": "GEN-24",
+   "spec_quote": "GEN-24: \"There is no ordering guarantee between player-events and game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "The baseline Snapshot.of(p) at L124 is taken after waiting for SESSION_EXPIRED in game-events, which by GEN-22 also settles REST and the journal. The setup's player-events (REGISTERED, DEPOSIT from fundedPlayer) are never awaited, and GEN-24 gives no ordering between the two topics. Run: the service expires the session on the first read after the advance and publishes SESSION_EXPIRED at once, while DEPOSIT reaches player-events 1.5 s after the deposit. The baseline lacks DEPOSIT, the event arrives during the 1 s quiet period of assertUnchanged (L126), and the test fails with 'unexpected player-events' although the refused finish published nothing.",
+   "expected_after_fix": "Before taking the baseline, also wait (EVENT_TIMEOUT) for the setup's last player-event (the DEPOSIT of fundedPlayer). Then every event the player is owed is already counted and only events caused by the refused finish can change the counts.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M44 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-9cc8c881aa",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "SessionTimingTest#finishExpired",
+    "display_name": "CL-072 finishing an EXPIRED session -> 409 SESSION_NOT_ACTIVE; nothing changes",
+    "tags": [
+     "SES-09"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/SessionTimingTest.java",
+    "line": 128
+   },
+   "requirement": "SES-09",
+   "spec_quote": "SES-09: \"Balance, journal, events and the session do not change\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "Under SES-09, 'nothing changes' includes the session. After the refusal, however, the session is checked only for status EXPIRED (L128) and finishedAt null (L129); winAmount is never read. Witness: the service answers 409 SESSION_NOT_ACTIVE and leaves balance, journal and events unchanged, but stores winAmount 40 on the expired session. The test passes. Points that are observed: 409 SESSION_NOT_ACTIVE at L125; balance, journal and events unchanged after a 1 s quiet period (Snapshot.assertUnchanged) at L126.",
+   "expected_after_fix": "After the refused finish, GET /api/sessions/{id} must return the session exactly as before the request: status EXPIRED, winAmount 0, finishedAt null, same betAmount and startedAt.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M44 (secondary)"
+    ]
+   },
+   "chk5": "H1"
+  },
+  {
+   "id": "F-d6efec337c",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "ValidationTest#numbersAsStrings",
+    "display_name": "CL-105 numbers sent as strings -> 400 VALIDATION_ERROR with the field name in details",
+    "tags": [
+     "GEN-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/ValidationTest.java",
+    "line": 127
+   },
+   "requirement": "GEN-03",
+   "spec_quote": "GEN-03: \"Refusal: 400 VALIDATION_ERROR, the field name in details.\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "Status 400 and code VALIDATION_ERROR are observed at line 126, but the point 'the field name in details' is checked by assertDetailsMention, which accepts any details value whose text merely contains the name as a substring (Asserts.java:60 and :65). Witness: for the bet argument the service answers 400 VALIDATION_ERROR with details {\"field\": \"betAmount\"} (for win: {\"field\": \"winAmount\"}), naming its internal/response field instead of the request field bet/win; 'betAmount'.contains('bet') is true, so the test passes although the field name bet is not in details.",
+   "expected_after_fix": "For every argument the refusal must be 400 VALIDATION_ERROR and details must name exactly the offending request field (amount, bet, win or playerId) as a key or as a whole value, not as a substring of some other name.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-630d66bdc3",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "ValidationTest#errorBodyFormat",
+    "display_name": "CL-110 error responses are JSON objects with a machine-readable code and a message",
+    "tags": [
+     "GEN-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/ValidationTest.java",
+    "line": 241
+   },
+   "requirement": "GEN-04",
+   "spec_quote": "GEN-04: \"a JSON object with a machine-readable code and a message ... Error codes in this document are values of code.\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "The JSON-object point is observed (line 241, isObject), but the machine-readable code is only required to be a non-blank string and the message only to be a string (lines 241-242), while GEN-04 fixes code to the documented error code of each case. Witness: the service answers the 10000.01 deposit with 422 {\"code\": \"Payment declined by provider\", \"message\": \"\"} and the second session start with 409 {\"code\": \"ERROR\", \"message\": \"\"}: there is no machine-readable PAYMENT_DECLINED / ACTIVE_SESSION_EXISTS code and the message is empty, yet every executable in assertAll passes. Status is also only checked as >= 400 (line 239).",
+   "expected_after_fix": "For each of the ten error responses the body must be a JSON object whose code equals the documented error code of that case (VALIDATION_ERROR, IDEMPOTENCY_KEY_REQUIRED, IDEMPOTENCY_KEY_INVALID, NOT_FOUND, ACTIVE_SESSION_EXISTS, DEPOSIT_AMOUNT_OUT_OF_RANGE, DEPOSIT_LIMIT_OUT_OF_RANGE, PAYMENT_DECLINED, SESSION_NOT_ACTIVE, INSUFFICIENT_FUNDS) and that carries a non-empty message.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": {
+    "green_on_own_fault": [
+     "M04 (primary)"
+    ]
+   },
+   "chk5": null
+  },
+  {
+   "id": "F-da0942fffb",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "ValidationTest#usdOnly",
+    "display_name": "CL-111 USD only: no other currency appears in responses or provider requests",
+    "tags": [
+     "GEN-01"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/ValidationTest.java",
+    "line": 269
+   },
+   "requirement": "GEN-01",
+   "spec_quote": "GEN-01: \"All monetary amounts are in US dollars (USD). No other currency exists.\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "Currency is only inspected under keys whose name contains 'currency' (line 269); any other representation of a currency passes. Witness: the deposit's POST /payments body is {\"playerId\": p, \"amount\": 100, \"ccy\": \"EUR\", \"reference\": \"r1\"}, or the deposit response shows \"balance\": \"100.00 EUR\"; no key contains 'currency', so assertNoForeignCurrency passes and the count at line 261 is 1, although another currency appears in a provider request or response. Also E4: the PUT limit response (line 254) and the player-creation response are never inspected, so even \"currency\": \"EUR\" there goes unnoticed.",
+   "expected_after_fix": "Every response the scenario produces (player creation, deposit, limit, session start, limit list) and every provider request it causes must be shown to designate no currency other than USD, whatever field or value form carries it, and the provider request amount must equal the USD operation amount.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-e7f2e93d1b",
+   "check": "CHK-1",
+   "kind": "E3",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "WithdrawalTest#approvedWithdrawal",
+    "display_name": "CL-041 approved withdrawal: 200, balance - amount, one WITHDRAWAL record, one event, one provider call",
+    "tags": [
+     "WDR-01"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/WithdrawalTest.java",
+    "line": 47
+   },
+   "requirement": "WDR-01",
+   "spec_quote": "WDR-01: \"Event: WITHDRAWAL in player-events.\"",
+   "problem": "Over-permissive assertion: the point is asserted, but the assertion admits a value the claim excludes.",
+   "evidence": "These claim points are observed: 200 (l.39), balance - amount (l.42 response 179.75, l.43 GET 179.75), one WITHDRAWAL record (l.45 size 1, l.46 amount 120.25) and one provider call (l.49 count == 1). 'One event' is not observed: Events.awaitOne (l.47) returns as soon as at least one WITHDRAWAL event of the player exists, and nothing checks that there is only one. Witness: the service publishes the WITHDRAWAL event twice for this single withdrawal, both with amount 120.25 (e.g. a send followed by a retried send). awaitOne returns the first one, l.48 matches 120.25, and the test passes although player-events holds two WITHDRAWAL events.",
+   "expected_after_fix": "After the WITHDRAWAL event has arrived, wait a quiet period of at least 1 s. Then establish that player-events holds exactly one WITHDRAWAL event for this player, with amount equal by value to 120.25.",
+   "fix_scope": "assertion",
+   "audit": "agree",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": null
+  },
+  {
+   "id": "F-0d9acfe68c",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "WithdrawalTest#outOfRange",
+    "display_name": "CL-043 withdrawal out of range: 422 WITHDRAWAL_AMOUNT_OUT_OF_RANGE, nothing changes, key free",
+    "tags": [
+     "WDR-02"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/WithdrawalTest.java",
+    "line": 69
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.69) runs right after fundedPlayer. It records the player's player-events/game-events counts without waiting for the setup's REGISTERED and DEPOSIT events, and the specification sets no time bound for their delivery. Run: the service publishes the setup DEPOSIT event 300 ms after the deposit response, which is allowed. The snapshot, read about 20 ms after that response, counts 1 player-event (REGISTERED). During the 1 s quiet period of before.assertUnchanged() (l.72) the DEPOSIT arrives, the count becomes 2, and assertAll fails with 'unexpected player-events: [DEPOSIT ...]' although the refused withdrawal published nothing. With faster delivery the same system passes. This applies to both arguments (9.99, 50000.01).",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the events of the setup operations (REGISTERED and the funding DEPOSIT) are observed for the player. The baseline then includes every event of operations completed before the refused withdrawal, and only events the refusal itself would publish can appear during the quiet period.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-898473164e",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "WithdrawalTest#activeSessionBlocks",
+    "display_name": "CL-045 active session: 409 ACTIVE_SESSION_EXISTS, nothing changes, provider not called, key free",
+    "tags": [
+     "WDR-03"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/WithdrawalTest.java",
+    "line": 96
+   },
+   "requirement": "SES-01",
+   "spec_quote": "SES-01: \"Event: SESSION_STARTED in game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.96) runs right after startOk (l.94) and fundedPlayer. It reads the event counts without waiting for SESSION_STARTED (game-events) or the setup REGISTERED/DEPOSIT (player-events), and the specification sets no time bound for their delivery. Run: the service publishes SESSION_STARTED 300 ms after the start response. The snapshot, about 20 ms after that response, counts 0 game-events. During the 1 s quiet period of before.assertUnchanged() (l.98) SESSION_STARTED arrives, and assertAll fails with 'unexpected game-events: [SESSION_STARTED ...]' although the refused withdrawal published nothing. With faster delivery the same system passes.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's REGISTERED, DEPOSIT and SESSION_STARTED events are observed. Only then send the withdrawal that must be refused and check that nothing new appears during the quiet period.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-a829dfb709",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "WithdrawalTest#insufficientFunds",
+    "display_name": "CL-047 amount above balance: 422 INSUFFICIENT_FUNDS, nothing changes, provider not called, key free",
+    "tags": [
+     "WDR-04"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/WithdrawalTest.java",
+    "line": 126
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.126) runs right after fundedPlayer. It counts the player's events without waiting for the setup REGISTERED and DEPOSIT events, and the specification sets no time bound for their delivery. Run: the DEPOSIT event reaches the collector 300 ms after the deposit response. The snapshot, about 20 ms after that response, counts 1 player-event. During the 1 s quiet period of before.assertUnchanged() (l.128) the count becomes 2, and the test fails with 'unexpected player-events: [DEPOSIT ...]' although the refused 100.01 withdrawal published nothing. With faster delivery the same system passes.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's REGISTERED and funding DEPOSIT events are observed, so that only events caused by the refused withdrawal can show up as a change.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-4aee53ceba",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "WithdrawalTest#payoutDecline",
+    "display_name": "CL-049 payout decline: 422 PAYOUT_DECLINED, nothing changes, key free; 5000.00 approved",
+    "tags": [
+     "WDR-05"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/WithdrawalTest.java",
+    "line": 151
+   },
+   "requirement": "DEP-01",
+   "spec_quote": "DEP-01: \"Event: DEPOSIT in player-events.\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.151) runs right after fundedPlayer(\"6000\"), a single DEPOSIT. It counts the player's events without waiting for that DEPOSIT event or the REGISTERED event, and the specification sets no time bound for their delivery. Run: the DEPOSIT event arrives 300 ms after the deposit response. The snapshot, about 20 ms after that response, counts 1 player-event. During the 1 s quiet period of before.assertUnchangedExceptProviderCalls() (l.153) the count becomes 2, and the test fails with 'unexpected player-events: [DEPOSIT ...]' although the declined payout published nothing. With faster delivery the same system passes.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's REGISTERED and funding DEPOSIT events are observed. Only then send the declined withdrawal and check that no event appears during the quiet period.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_GREEN",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-904552baf4",
+   "check": "CHK-5",
+   "kind": "H1",
+   "severity": "medium",
+   "target": {
+    "type": "test",
+    "test": "WithdrawalTest#sessionBeforeBalanceBeforeProvider",
+    "display_name": "CL-052 order of checks: active session before balance, balance before provider",
+    "tags": [
+     "WDR-06"
+    ],
+    "file": "api-tests/src/test/java/com/arcade/qa/tests/WithdrawalTest.java",
+    "line": 189
+   },
+   "requirement": "SES-07",
+   "spec_quote": "SES-07: \"Event: SESSION_FINISHED in game-events\"",
+   "problem": "Premature observation: an asynchronous or deadline-driven outcome is asserted before the specification guarantees it is observable.",
+   "evidence": "Snapshot.of(p) (l.189) runs right after finishOk (l.188). It counts the player's game-events without waiting for that SESSION_FINISHED event (or for the SESSION_STARTED/DEPOSIT events of the setup shortly before), and the specification sets no time bound for event delivery. Run: SESSION_FINISHED reaches the collector 300 ms after the finish response. The snapshot, about 20 ms after that response, counts 1 game-event (SESSION_STARTED). During the 1 s quiet period of before.assertUnchanged() (l.192) the count becomes 2, and the test fails with 'unexpected game-events: [SESSION_FINISHED ...]' although the refused 6000 withdrawal published nothing. With faster delivery the same system passes.",
+   "expected_after_fix": "Before taking the baseline, wait with the standard event timeout until the player's SESSION_FINISHED event (and the earlier setup events) are observed. Only then send the 6000 withdrawal and check that nothing changes during the quiet period.",
+   "fix_scope": "wait",
+   "audit": "not sampled",
+   "base_outcome": "STABLE_RED",
+   "chk4": null,
+   "chk5": "H1"
+  },
+  {
+   "id": "F-3464bd3b63",
+   "check": "CHK-4",
+   "kind": "OWN_TESTS_MISS",
+   "severity": "medium",
+   "target": {
+    "type": "requirement",
+    "requirement": "DEP-03",
+    "fault": "M18"
+   },
+   "requirement": "DEP-03",
+   "spec_quote": "DEP-03: \"Deposit limits.\"",
+   "problem": "No test tagged DEP-03 fails when this part is broken: A deposit that exceeds a limit is refused. How to observe: Daily 100, weekly 500, no deposits; deposit 200 → spec `422 DEPOSIT_LIMIT_EXCEEDED` (DAILY, remaining 100.00) → `200`. With a single limit it still works",
+   "evidence": "Own tests that stay green on M18: DepositLimitCountingTest#depositAgainstLimit, DepositTest#limitsBeforeProvider. Caught only by tests of other requirements: DepositLimitCountingTest#mostRestrictivePeriod, DepositLimitCountingTest#tieGoesToShortestPeriod.",
+   "expected_after_fix": "At least one test tagged DEP-03 fails on M18 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "DepositLimitCountingTest#depositAgainstLimit",
+    "DepositTest#limitsBeforeProvider"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-9983bbf29b",
+   "check": "CHK-4",
+   "kind": "OWN_TESTS_MISS",
+   "severity": "medium",
+   "target": {
+    "type": "requirement",
+    "requirement": "GEN-04",
+    "fault": "M04"
+   },
+   "requirement": "GEN-04",
+   "spec_quote": "GEN-04: \"Error body.\"",
+   "problem": "No test tagged GEN-04 fails when this part is broken: Error body carries a `message`. How to observe: `POST /api/players/{id}/deposit` with a key and body `{}` → spec JSON with `code` and `message` → `{\"code\":\"VALIDATION_ERROR\",\"timestamp\":…,\"details\":{…}}` with no `message`",
+   "evidence": "Own tests that stay green on M04: SecurityTest#noInternalsDisclosed, ValidationTest#errorBodyFormat. Caught only by tests of other requirements: DepositTest#formatBeforeUnknownPlayer, GameSessionTest#formatAndPlayerFirst, GameSessionTest#invalidGame, GameSessionTest#negativeWin, IdempotencyKeyTest#depositErrorsKeepKeyFree, ValidationTest#requiredFieldMissingOrNull, ValidationTest#threeDecimalsRefused, ValidationTest#trailingZeroCounted, WithdrawalTest#formatAndPlayerFirst.",
+   "expected_after_fix": "At least one test tagged GEN-04 fails on M04 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "SecurityTest#noInternalsDisclosed",
+    "ValidationTest#errorBodyFormat"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-4100f58504",
+   "check": "CHK-4",
+   "kind": "UNCAUGHT",
+   "severity": "high",
+   "target": {
+    "type": "requirement",
+    "requirement": "GEN-10",
+    "fault": "M57"
+   },
+   "requirement": "GEN-10",
+   "spec_quote": "GEN-10: \"Key scope.\"",
+   "problem": "No test tagged GEN-10 fails when this part is broken: The same key value of two players is two independent keys, deposit and withdrawal (session start already fails, see M55). How to observe: Player A deposits 100 with key K; player B deposits 50 with K (`200`); B repeats the 50 deposit with K → spec replay of B's response (`200`, `Idempotent-Replayed: true`) → `500 INTERNAL_ERROR` (two records for K); A's repeats fail the same way",
+   "evidence": "Own tests that stay green on M57: SecurityTest#keyIsolationBetweenPlayers.",
+   "expected_after_fix": "At least one test tagged GEN-10 fails on M57 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "SecurityTest#keyIsolationBetweenPlayers"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-e950d10446",
+   "check": "CHK-4",
+   "kind": "OWN_TESTS_MISS",
+   "severity": "medium",
+   "target": {
+    "type": "requirement",
+    "requirement": "GEN-15",
+    "fault": "M07"
+   },
+   "requirement": "GEN-15",
+   "spec_quote": "GEN-15: \"Unsuccessful requests do not consume the key.\"",
+   "problem": "No test tagged GEN-15 fails when this part is broken: Key of a failed request stays free (after a `502`). How to observe: Stub `/payments` unreachable (fault mapping); deposit 100 with key K → `502`; restore the stub; deposit 100 with key K → spec processed as new, `200` → `409 IDEMPOTENCY_KEY_IN_PROGRESS`, permanently",
+   "evidence": "Own tests that stay green on M07: DepositTest#outOfRangeKeepsKeyFree, IdempotencyKeyTest#depositErrorsKeepKeyFree, IdempotencyKeyTest#sessionErrorsKeepKeyFree. Caught only by tests of other requirements: PaymentProviderTest#depositUnreachable, PaymentProviderTest#withdrawalUnreachable.",
+   "expected_after_fix": "At least one test tagged GEN-15 fails on M07 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "DepositTest#outOfRangeKeepsKeyFree",
+    "IdempotencyKeyTest#depositErrorsKeepKeyFree",
+    "IdempotencyKeyTest#sessionErrorsKeepKeyFree"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-84edb0e464",
+   "check": "CHK-4",
+   "kind": "UNCAUGHT",
+   "severity": "high",
+   "target": {
+    "type": "requirement",
+    "requirement": "LDB-01",
+    "fault": "M49"
+   },
+   "requirement": "LDB-01",
+   "spec_quote": "LDB-01: \"Reading the leaderboard.\"",
+   "problem": "No test tagged LDB-01 fails when this part is broken: At most 10 entries. How to observe: At least 11 players with net result > 0 in the period (e.g. 11 test players that each win more than they bet) → `GET /api/leaderboard`: spec 10 entries → all positive players",
+   "evidence": "Own tests that stay green on M49: LeaderboardTest#topFormat.",
+   "expected_after_fix": "At least one test tagged LDB-01 fails on M49 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "LeaderboardTest#topFormat"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-c2e1d44c6c",
+   "check": "CHK-4",
+   "kind": "UNCAUGHT",
+   "severity": "high",
+   "target": {
+    "type": "requirement",
+    "requirement": "LIM-10",
+    "fault": "M30"
+   },
+   "requirement": "LIM-10",
+   "spec_quote": "LIM-10: \"Removing a limit.\"",
+   "problem": "No test tagged LIM-10 fails when this part is broken: Period without a limit → `404`. How to observe: Daily 100; DELETE daily; clock +25H; DELETE daily → spec `404 NOT_FOUND` → `500 INTERNAL_ERROR` (a never-set period still gives 404). **After the clock moves**",
+   "evidence": "Own tests that stay green on M30: DepositLimitsTest#deleteWithoutLimit, DepositLimitsTest#removalLifecycle.",
+   "expected_after_fix": "At least one test tagged LIM-10 fails on M30 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "DepositLimitsTest#deleteWithoutLimit",
+    "DepositLimitsTest#removalLifecycle"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-c873bdc432",
+   "check": "CHK-4",
+   "kind": "UNCAUGHT",
+   "severity": "high",
+   "target": {
+    "type": "requirement",
+    "requirement": "SES-07",
+    "fault": "M42"
+   },
+   "requirement": "SES-07",
+   "spec_quote": "SES-07: \"Finishing a session.\"",
+   "problem": "No test tagged SES-07 fails when this part is broken: Event SESSION_FINISHED field `finishedAt`. How to observe: Start; finish win 5 → `game-events` SESSION_FINISHED: spec `finishedAt` = the session's `finishedAt` (`GET /api/sessions/{id}`) → equal to `startedAt`",
+   "evidence": "Own tests that stay green on M42: GameSessionTest#finishWithWin, GameSessionTest#negativeWin, GameSessionTest#timesOnServiceClock.",
+   "expected_after_fix": "At least one test tagged SES-07 fails on M42 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "GameSessionTest#finishWithWin",
+    "GameSessionTest#negativeWin",
+    "GameSessionTest#timesOnServiceClock"
+   ],
+   "audit": "n/a"
+  },
+  {
+   "id": "F-9f1e42ad87",
+   "check": "CHK-4",
+   "kind": "OWN_TESTS_MISS",
+   "severity": "medium",
+   "target": {
+    "type": "requirement",
+    "requirement": "WDR-06",
+    "fault": "M63"
+   },
+   "requirement": "WDR-06",
+   "spec_quote": "WDR-06: \"Order of checks.\"",
+   "problem": "No test tagged WDR-06 fails when this part is broken: Amount range (4) before balance (6) (step 5, active session, already missing). How to observe: New player (balance 0); withdraw 60000 → spec `422 WITHDRAWAL_AMOUNT_OUT_OF_RANGE` → `422 INSUFFICIENT_FUNDS`",
+   "evidence": "Own tests that stay green on M63: WithdrawalTest#formatAndPlayerFirst, WithdrawalTest#keyBeforeRangeBeforeSession. Caught only by tests of other requirements: SecurityTest#hugeAmounts, WithdrawalTest#outOfRange.",
+   "expected_after_fix": "At least one test tagged WDR-06 fails on M63 and passes on base.",
+   "fix_scope": "assertion | new-test",
+   "candidate_tests": [
+    "WithdrawalTest#formatAndPlayerFirst",
+    "WithdrawalTest#keyBeforeRangeBeforeSession"
+   ],
+   "audit": "n/a"
+  }
+ ]
+}

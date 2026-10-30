@@ -1,0 +1,21 @@
+diff --git a/player-service/src/main/java/com/arcade/player/events/PlayerEvent.java b/player-service/src/main/java/com/arcade/player/events/PlayerEvent.java
+index 30f06d9..d42c1a1 100644
+--- a/player-service/src/main/java/com/arcade/player/events/PlayerEvent.java
++++ b/player-service/src/main/java/com/arcade/player/events/PlayerEvent.java
+@@ -1,5 +1,7 @@
+ package com.arcade.player.events;
+ 
++import com.fasterxml.jackson.annotation.JsonFormat;
++
+ import java.math.BigDecimal;
+ 
+ /**
+@@ -9,7 +11,7 @@ public record PlayerEvent(
+         String eventId,
+         String type,
+         Long playerId,
+-        BigDecimal amount,
++        @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal amount,
+         String at
+ ) {
+ }

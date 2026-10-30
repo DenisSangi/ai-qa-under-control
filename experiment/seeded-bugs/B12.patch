@@ -1,0 +1,15 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..a117167 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -102,9 +102,7 @@ public class GameService {
+         session.setWinAmount(win);
+         session.setStatus(SessionStatus.FINISHED);
+         session.setFinishedAt(now);
+-        if (win.signum() > 0) {
+-            transactions.save(new PaymentTransaction(player.getId(), TxType.WIN, win, now));
+-        }
++        transactions.save(new PaymentTransaction(player.getId(), TxType.WIN, win, now));
+         events.publishSessionEvent(player.getId(), new SessionFinishedEvent(
+                 UUID.randomUUID().toString(), SessionFinishedEvent.TYPE, sessionId, player.getId(),
+                 session.getGame(), session.getBetAmount(), win, now.toString()));

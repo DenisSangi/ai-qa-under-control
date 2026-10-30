@@ -1,0 +1,23 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+index 4c275f4..68d11ca 100644
+--- a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
++++ b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+@@ -69,14 +69,14 @@ public class IdempotencyService {
+                 continue;
+             }
+             IdempotencyRecord record = existing.get();
+-            // A key in progress is busy whatever the request: its fingerprint matters only once consumed.
+-            if (record.getStatus() == IdempotencyRecord.Status.IN_PROGRESS) {
+-                throw inProgress(key);
+-            }
+             if (!record.matches(operation, amount)) {
+                 throw new BusinessException("IDEMPOTENCY_KEY_REUSED", HttpStatus.UNPROCESSABLE_ENTITY,
+                         HEADER + " '" + key + "' was already used for a different request");
+             }
++            // A key in progress is busy whatever the request: its fingerprint matters only once consumed.
++            if (record.getStatus() == IdempotencyRecord.Status.IN_PROGRESS) {
++                throw inProgress(key);
++            }
+             return Optional.of(record.getResponseBody());
+         }
+         throw inProgress(key);

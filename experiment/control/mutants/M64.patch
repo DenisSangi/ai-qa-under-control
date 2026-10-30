@@ -1,0 +1,17 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..f6b4bfd 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -63,11 +63,11 @@ public class GameService {
+     public SessionDto start(StartSessionRequest request) {
+         Player player = players.findByIdForUpdate(request.playerId())
+                 .orElseThrow(() -> new NotFoundException("player " + request.playerId() + " not found"));
+-        AmountRange.BET.check(request.bet());
+         if (sessions.existsByPlayerIdAndStatus(player.getId(), SessionStatus.ACTIVE)) {
+             throw new BusinessException("ACTIVE_SESSION_EXISTS", HttpStatus.CONFLICT,
+                     "player " + player.getId() + " already has an active session");
+         }
++        AmountRange.BET.check(request.bet());
+         if (player.getBalance().compareTo(request.bet()) < 0) {
+             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
+                     "balance " + player.getBalance() + " is lower than bet " + request.bet());

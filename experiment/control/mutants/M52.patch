@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java b/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
+index a6301e5..a4ee2a9 100644
+--- a/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
++++ b/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
+@@ -23,7 +23,7 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long>
+             where s.status = com.arcade.player.domain.SessionStatus.FINISHED
+               and s.finishedAt >= :from and s.finishedAt < :to
+             group by p.id, p.username
+-            having sum(s.winAmount - s.betAmount) > 0
++            having sum(s.winAmount - s.betAmount) >= 0
+             order by sum(s.winAmount - s.betAmount) desc
+             """)
+     List<LeaderboardEntry> findTop(@Param("from") Instant from, @Param("to") Instant to, Pageable pageable);

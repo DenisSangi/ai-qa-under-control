@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..67e61dc 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -107,7 +107,7 @@ public class DepositLimitService {
+         BigDecimal allowed = null;
+         for (DepositLimit limit : activeLimits(playerId, now)) {
+             BigDecimal remaining = remaining(limit.getAmount(), used(playerId, limit.getPeriod(), now));
+-            if (allowed == null || remaining.compareTo(allowed) < 0) {
++            if (allowed == null || remaining.compareTo(allowed) > 0) {
+                 restrictive = limit;
+                 allowed = remaining;
+             }

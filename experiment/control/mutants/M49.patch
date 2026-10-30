@@ -1,0 +1,22 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java b/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
+index 42ae43f..3fc21b6 100644
+--- a/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
++++ b/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
+@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Value;
+-import org.springframework.data.domain.PageRequest;
++import org.springframework.data.domain.Pageable;
+ import org.springframework.data.redis.core.StringRedisTemplate;
+ import org.springframework.scheduling.annotation.Scheduled;
+ import org.springframework.stereotype.Service;
+@@ -86,7 +86,7 @@ public class LeaderboardService {
+ 
+     public synchronized List<LeaderboardEntry> refresh() {
+         Instant[] period = currentPeriod(clock.instant());
+-        List<LeaderboardEntry> top = sessions.findTop(period[0], period[1], PageRequest.of(0, 10));
++        List<LeaderboardEntry> top = sessions.findTop(period[0], period[1], Pageable.unpaged());
+         try {
+             redis.opsForValue().set(KEY, mapper.writeValueAsString(top), ttl);
+         } catch (Exception e) {

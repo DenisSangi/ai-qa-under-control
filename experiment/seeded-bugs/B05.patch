@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..accf523 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -74,7 +74,7 @@ public class DepositLimitService {
+         limit.applyDuePendingChange(now);
+         if (!limit.isActive() || amount.compareTo(limit.getAmount()) <= 0) {
+             limit.applyNow(amount);
+-        } else if (!limit.isPending(amount)) {
++        } else {
+             limit.schedule(amount, now.plus(coolingOff));
+         }
+         return toDto(limit, now);

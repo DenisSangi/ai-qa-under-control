@@ -1,0 +1,12 @@
+diff --git a/player-service/src/main/java/com/arcade/player/web/SessionController.java b/player-service/src/main/java/com/arcade/player/web/SessionController.java
+index 7145037..4481a24 100644
+--- a/player-service/src/main/java/com/arcade/player/web/SessionController.java
++++ b/player-service/src/main/java/com/arcade/player/web/SessionController.java
+@@ -25,7 +25,6 @@ public class SessionController {
+     }
+ 
+     @PostMapping
+-    @ResponseStatus(HttpStatus.CREATED)
+     public SessionDto start(@Valid @RequestBody StartSessionRequest request) {
+         return gameService.start(request);
+     }

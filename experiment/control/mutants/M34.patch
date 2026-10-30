@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/AmountRange.java b/player-service/src/main/java/com/arcade/player/service/AmountRange.java
+index d893584..e5e72e7 100644
+--- a/player-service/src/main/java/com/arcade/player/service/AmountRange.java
++++ b/player-service/src/main/java/com/arcade/player/service/AmountRange.java
+@@ -13,7 +13,7 @@ public record AmountRange(String code, BigDecimal min, BigDecimal max) {
+     public static final AmountRange DEPOSIT =
+             new AmountRange("DEPOSIT_AMOUNT_OUT_OF_RANGE", new BigDecimal("10.00"), new BigDecimal("50000.00"));
+     public static final AmountRange WITHDRAWAL =
+-            new AmountRange("WITHDRAWAL_AMOUNT_OUT_OF_RANGE", new BigDecimal("10.00"), new BigDecimal("50000.00"));
++            new AmountRange("WITHDRAWAL_AMOUNT_OUT_OF_RANGE", new BigDecimal("1.00"), new BigDecimal("50000.00"));
+     public static final AmountRange DEPOSIT_LIMIT =
+             new AmountRange("DEPOSIT_LIMIT_OUT_OF_RANGE", new BigDecimal("10.00"), new BigDecimal("1000000.00"));
+     public static final AmountRange BET =

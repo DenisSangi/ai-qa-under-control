@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..f5080f5 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -92,7 +92,7 @@ public class GameService {
+                     "session " + sessionId + " is " + session.getStatus() + ", only ACTIVE sessions can be finished");
+         }
+         Instant now = clock.instant();
+-        if (isOverdue(session, now)) {
++        if (isOverdue(session, now.plusSeconds(1))) {
+             throw new BusinessException("SESSION_NOT_ACTIVE", HttpStatus.CONFLICT,
+                     "session " + sessionId + " was not finished within " + timeout.toSeconds() + " seconds");
+         }

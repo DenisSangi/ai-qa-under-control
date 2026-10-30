@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/domain/IdempotencyRecord.java b/player-service/src/main/java/com/arcade/player/domain/IdempotencyRecord.java
+index efde5e2..b8be126 100644
+--- a/player-service/src/main/java/com/arcade/player/domain/IdempotencyRecord.java
++++ b/player-service/src/main/java/com/arcade/player/domain/IdempotencyRecord.java
+@@ -57,7 +57,7 @@ public class IdempotencyRecord {
+ 
+     /** Same key, same request: the operation and the amount match ({@code 50} equals {@code 50.00}). */
+     public boolean matches(TxType operation, BigDecimal amount) {
+-        return this.operation == operation && this.amount.compareTo(amount) == 0;
++        return this.operation == operation && this.amount.equals(amount);
+     }
+ 
+     public void complete(String responseBody) {

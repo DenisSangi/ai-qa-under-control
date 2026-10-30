@@ -1,0 +1,16 @@
+diff --git a/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java b/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
+index a6301e5..0b1a723 100644
+--- a/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
++++ b/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
+@@ -20,8 +20,9 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long>
+     @Query("""
+             select new com.arcade.player.dto.LeaderboardEntry(p.id, p.username, sum(s.winAmount - s.betAmount))
+             from GameSession s join s.player p
+-            where s.status = com.arcade.player.domain.SessionStatus.FINISHED
+-              and s.finishedAt >= :from and s.finishedAt < :to
++            where s.status in (com.arcade.player.domain.SessionStatus.FINISHED,
++                               com.arcade.player.domain.SessionStatus.EXPIRED)
++              and coalesce(s.finishedAt, s.startedAt) >= :from and coalesce(s.finishedAt, s.startedAt) < :to
+             group by p.id, p.username
+             having sum(s.winAmount - s.betAmount) > 0
+             order by sum(s.winAmount - s.betAmount) desc

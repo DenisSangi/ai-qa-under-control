@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/web/GlobalExceptionHandler.java b/player-service/src/main/java/com/arcade/player/web/GlobalExceptionHandler.java
+index df5f683..d0653bb 100644
+--- a/player-service/src/main/java/com/arcade/player/web/GlobalExceptionHandler.java
++++ b/player-service/src/main/java/com/arcade/player/web/GlobalExceptionHandler.java
+@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
+         for (FieldError fe : e.getBindingResult().getFieldErrors()) {
+             details.put(fe.getField(), fe.getDefaultMessage());
+         }
+-        return error("VALIDATION_ERROR", "request validation failed", details);
++        return error("VALIDATION_ERROR", null, details);
+     }
+ 
+     /**

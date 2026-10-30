@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+index 4c275f4..a18a6ab 100644
+--- a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
++++ b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+@@ -30,7 +30,7 @@ public class IdempotencyService {
+     public static final String HEADER = "Idempotency-Key";
+     public static final String REPLAYED_HEADER = "Idempotent-Replayed";
+ 
+-    private static final Pattern KEY_FORMAT = Pattern.compile("[\\x20-\\x7E]{1,64}");
++    private static final Pattern KEY_FORMAT = Pattern.compile("[\\x20-\\x7E]{1,65}");
+ 
+     private final IdempotencyRepository records;
+     private final ObjectMapper mapper;

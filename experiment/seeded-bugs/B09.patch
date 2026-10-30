@@ -1,0 +1,14 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..ca5085c 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -135,9 +135,6 @@ public class DepositLimitService {
+             boolean longer = other.getPeriod().compareTo(period) > 0;
+             List<BigDecimal> values = new ArrayList<>();
+             values.add(other.getAmount());
+-            if (other.getPendingAmount() != null) {
+-                values.add(other.getPendingAmount());
+-            }
+             for (BigDecimal value : values) {
+                 if (longer ? amount.compareTo(value) > 0 : amount.compareTo(value) < 0) {
+                     Map<String, String> details = new LinkedHashMap<>();

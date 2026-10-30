@@ -1,0 +1,14 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..b1a5fc7 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -65,8 +65,8 @@ public class DepositLimitService {
+      */
+     @Transactional
+     public DepositLimitDto set(Long playerId, DepositLimitPeriod period, BigDecimal amount) {
+-        lockPlayer(playerId);
+         AmountRange.DEPOSIT_LIMIT.check(amount);
++        lockPlayer(playerId);
+         Instant now = clock.instant();
+         checkOrder(playerId, period, amount, now);
+         DepositLimit limit = limits.findByPlayerIdAndPeriod(playerId, period)

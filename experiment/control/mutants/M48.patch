@@ -1,0 +1,12 @@
+diff --git a/player-service/src/main/java/com/arcade/player/web/SessionController.java b/player-service/src/main/java/com/arcade/player/web/SessionController.java
+index 7145037..bcffe28 100644
+--- a/player-service/src/main/java/com/arcade/player/web/SessionController.java
++++ b/player-service/src/main/java/com/arcade/player/web/SessionController.java
+@@ -36,6 +36,7 @@ public class SessionController {
+     }
+ 
+     @GetMapping("/{id}")
++    @ResponseStatus(HttpStatus.CREATED)
+     public SessionDto get(@PathVariable Long id) {
+         return gameService.get(id);
+     }

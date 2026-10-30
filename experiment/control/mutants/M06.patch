@@ -1,0 +1,14 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..aafe204 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -52,9 +52,6 @@ public class DepositLimitService {
+ 
+     @Transactional
+     public List<DepositLimitDto> list(Long playerId) {
+-        if (!players.existsById(playerId)) {
+-            throw playerNotFound(playerId);
+-        }
+         Instant now = clock.instant();
+         return activeLimits(playerId, now).stream().map(limit -> toDto(limit, now)).toList();
+     }

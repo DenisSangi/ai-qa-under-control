@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..41e95b5 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -87,7 +87,7 @@ public class GameService {
+         // Lock order: session, then player. Nothing locks a player and then a session, so no deadlock.
+         GameSession session = sessions.findByIdForUpdate(sessionId)
+                 .orElseThrow(() -> new NotFoundException("session " + sessionId + " not found"));
+-        if (session.getStatus() != SessionStatus.ACTIVE) {
++        if (session.getStatus() == SessionStatus.EXPIRED) {
+             throw new BusinessException("SESSION_NOT_ACTIVE", HttpStatus.CONFLICT,
+                     "session " + sessionId + " is " + session.getStatus() + ", only ACTIVE sessions can be finished");
+         }

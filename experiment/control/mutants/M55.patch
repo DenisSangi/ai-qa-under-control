@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/web/PlayerController.java b/player-service/src/main/java/com/arcade/player/web/PlayerController.java
+index f339d5a..401c1b5 100644
+--- a/player-service/src/main/java/com/arcade/player/web/PlayerController.java
++++ b/player-service/src/main/java/com/arcade/player/web/PlayerController.java
+@@ -78,7 +78,7 @@ public class PlayerController {
+     @PostMapping("/{id}/withdraw")
+     public ResponseEntity<?> withdraw(@PathVariable Long id,
+                                       @Parameter(required = true, description = IDEMPOTENCY_KEY_DOC)
+-                                      @RequestHeader(name = IdempotencyService.HEADER, required = false) String key,
++                                      @RequestHeader(name = IdempotencyService.HEADER, required = true) String key,
+                                       @Valid @RequestBody WithdrawRequest request) {
+         return idempotent(id, key, TxType.WITHDRAWAL, request.amount(),
+                 () -> playerService.withdraw(id, request.amount(), key));

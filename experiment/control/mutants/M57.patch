@@ -1,0 +1,26 @@
+diff --git a/player-service/src/main/java/com/arcade/player/repo/IdempotencyRepository.java b/player-service/src/main/java/com/arcade/player/repo/IdempotencyRepository.java
+index cab156e..c3df228 100644
+--- a/player-service/src/main/java/com/arcade/player/repo/IdempotencyRepository.java
++++ b/player-service/src/main/java/com/arcade/player/repo/IdempotencyRepository.java
+@@ -32,6 +32,8 @@ public interface IdempotencyRepository extends JpaRepository<IdempotencyRecord,
+ 
+     Optional<IdempotencyRecord> findByPlayerIdAndKey(Long playerId, String key);
+ 
++    Optional<IdempotencyRecord> findByKey(String key);
++
+     @Modifying
+     @Transactional
+     @Query("delete from IdempotencyRecord r where r.playerId = :playerId and r.key = :key")
+diff --git a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+index 4c275f4..23e556c 100644
+--- a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
++++ b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+@@ -64,7 +64,7 @@ public class IdempotencyService {
+             if (records.tryInsert(playerId, key, operation.name(), amount, clock.instant()) == 1) {
+                 return Optional.empty();
+             }
+-            Optional<IdempotencyRecord> existing = records.findByPlayerIdAndKey(playerId, key);
++            Optional<IdempotencyRecord> existing = records.findByKey(key);
+             if (existing.isEmpty()) {
+                 continue;
+             }

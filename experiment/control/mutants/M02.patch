@@ -1,0 +1,12 @@
+diff --git a/player-service/src/main/java/com/arcade/player/dto/DepositLimitRequest.java b/player-service/src/main/java/com/arcade/player/dto/DepositLimitRequest.java
+index d8a3d33..24f5cba 100644
+--- a/player-service/src/main/java/com/arcade/player/dto/DepositLimitRequest.java
++++ b/player-service/src/main/java/com/arcade/player/dto/DepositLimitRequest.java
+@@ -8,7 +8,6 @@ import java.math.BigDecimal;
+ /** Only the format is validated here; the allowed range is a business rule (AmountRange, 422). */
+ public record DepositLimitRequest(
+         @NotNull
+-        @Digits(integer = Integer.MAX_VALUE, fraction = 2, message = "must have at most 2 decimal places")
+         BigDecimal amount
+ ) {
+ }

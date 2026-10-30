@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..a79e0e2 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -107,7 +107,7 @@ public class GameService {
+         }
+         events.publishSessionEvent(player.getId(), new SessionFinishedEvent(
+                 UUID.randomUUID().toString(), SessionFinishedEvent.TYPE, sessionId, player.getId(),
+-                session.getGame(), session.getBetAmount(), win, now.toString()));
++                session.getGame(), session.getBetAmount(), win, session.getStartedAt().toString()));
+         AfterCommit.run("leaderboard refresh", leaderboard::refresh);
+         return SessionDto.from(session);
+     }

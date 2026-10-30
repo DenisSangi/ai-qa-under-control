@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..dcc6cda 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -101,7 +101,7 @@ public class PlayerService {
+         transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount, clock.instant()));
+         idempotency.complete(id, idempotencyKey, player);
+         events.publishPlayerEvent(new PlayerEvent(
+-                UUID.randomUUID().toString(), "WITHDRAWAL", id, amount, clock.instant().toString()));
++                UUID.randomUUID().toString(), "DEPOSIT", id, amount, clock.instant().toString()));
+         return player;
+     }
+ 

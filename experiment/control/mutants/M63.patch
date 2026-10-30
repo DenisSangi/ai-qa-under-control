@@ -1,0 +1,18 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..3f49881 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -90,12 +90,12 @@ public class PlayerService {
+     /** The idempotency key must already be claimed by IdempotencyService. */
+     @Transactional
+     public Player withdraw(Long id, BigDecimal amount, String idempotencyKey) {
+-        AmountRange.WITHDRAWAL.check(amount);
+         Player player = lock(id);
+         if (player.getBalance().compareTo(amount) < 0) {
+             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
+                     "balance " + player.getBalance() + " is lower than withdrawal " + amount);
+         }
++        AmountRange.WITHDRAWAL.check(amount);
+         payment.payout(id, amount, IdempotencyService.reference(id, idempotencyKey));
+         player.setBalance(player.getBalance().subtract(amount));
+         transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount, clock.instant()));

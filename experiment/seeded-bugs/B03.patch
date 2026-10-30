@@ -1,0 +1,39 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/EventPublisher.java b/player-service/src/main/java/com/arcade/player/service/EventPublisher.java
+index fab0e76..cb0bc85 100644
+--- a/player-service/src/main/java/com/arcade/player/service/EventPublisher.java
++++ b/player-service/src/main/java/com/arcade/player/service/EventPublisher.java
+@@ -34,6 +34,15 @@ public class EventPublisher {
+         send(PLAYER_EVENTS, String.valueOf(event.playerId()), event);
+     }
+ 
++    /** Sent at once, without waiting for the transaction to commit. */
++    public void publishPlayerEventNow(PlayerEvent event) {
++        try {
++            kafka.send(PLAYER_EVENTS, String.valueOf(event.playerId()), mapper.writeValueAsString(event));
++        } catch (JsonProcessingException e) {
++            throw new IllegalStateException("failed to serialize event", e);
++        }
++    }
++
+     private void send(String topic, String key, Object payload) {
+         String json;
+         try {
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..cb619ed 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -96,12 +96,12 @@ public class PlayerService {
+             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
+                     "balance " + player.getBalance() + " is lower than withdrawal " + amount);
+         }
++        events.publishPlayerEventNow(new PlayerEvent(
++                UUID.randomUUID().toString(), "WITHDRAWAL", id, amount, clock.instant().toString()));
+         payment.payout(id, amount, IdempotencyService.reference(id, idempotencyKey));
+         player.setBalance(player.getBalance().subtract(amount));
+         transactions.save(new PaymentTransaction(id, TxType.WITHDRAWAL, amount, clock.instant()));
+         idempotency.complete(id, idempotencyKey, player);
+-        events.publishPlayerEvent(new PlayerEvent(
+-                UUID.randomUUID().toString(), "WITHDRAWAL", id, amount, clock.instant().toString()));
+         return player;
+     }
+ 

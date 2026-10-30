@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..85aef73 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -92,7 +92,7 @@ public class PlayerService {
+     public Player withdraw(Long id, BigDecimal amount, String idempotencyKey) {
+         AmountRange.WITHDRAWAL.check(amount);
+         Player player = lock(id);
+-        if (player.getBalance().compareTo(amount) < 0) {
++        if (player.getBalance().compareTo(amount) <= 0) {
+             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
+                     "balance " + player.getBalance() + " is lower than withdrawal " + amount);
+         }

@@ -1,0 +1,19 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..6ad39c9 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -166,8 +166,12 @@ public class DepositLimitService {
+     }
+ 
+     private BigDecimal used(Long playerId, DepositLimitPeriod period, Instant now) {
+-        BigDecimal sum = transactions.sumSince(playerId, TxType.DEPOSIT, now.minus(period.getWindow()));
+-        return money(sum == null ? BigDecimal.ZERO : sum);
++        Instant since = now.minus(period.getWindow());
++        BigDecimal deposits = transactions.sumSince(playerId, TxType.DEPOSIT, since);
++        BigDecimal withdrawals = transactions.sumSince(playerId, TxType.WITHDRAWAL, since);
++        BigDecimal net = (deposits == null ? BigDecimal.ZERO : deposits)
++                .subtract(withdrawals == null ? BigDecimal.ZERO : withdrawals);
++        return money(net.max(BigDecimal.ZERO));
+     }
+ 
+     private DepositLimitDto toDto(DepositLimit limit, Instant now) {

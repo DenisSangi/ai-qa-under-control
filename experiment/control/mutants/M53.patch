@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java b/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
+index 42ae43f..13d8c06 100644
+--- a/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
++++ b/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
+@@ -94,7 +94,7 @@ public class LeaderboardService {
+         }
+         if (lastSent == null) {
+             lastSent = top;
+-        } else if (!top.equals(lastSent)) {
++        } else if (top != lastSent) {
+             broadcast(top);
+             lastSent = top;
+         }

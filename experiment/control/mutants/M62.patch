@@ -1,0 +1,32 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+index 4c275f4..88a87f6 100644
+--- a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
++++ b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
+ import java.math.BigDecimal;
+ import java.nio.charset.StandardCharsets;
+ import java.time.Clock;
++import java.time.Duration;
+ import java.util.Optional;
+ import java.util.UUID;
+ import java.util.regex.Pattern;
+@@ -30,6 +31,8 @@ public class IdempotencyService {
+     public static final String HEADER = "Idempotency-Key";
+     public static final String REPLAYED_HEADER = "Idempotent-Replayed";
+ 
++    private static final Duration KEY_LIFETIME = Duration.ofDays(30);
++
+     private static final Pattern KEY_FORMAT = Pattern.compile("[\\x20-\\x7E]{1,64}");
+ 
+     private final IdempotencyRepository records;
+@@ -73,6 +76,10 @@ public class IdempotencyService {
+             if (record.getStatus() == IdempotencyRecord.Status.IN_PROGRESS) {
+                 throw inProgress(key);
+             }
++            if (record.getCreatedAt().isBefore(clock.instant().minus(KEY_LIFETIME))) {
++                release(playerId, key);
++                continue;
++            }
+             if (!record.matches(operation, amount)) {
+                 throw new BusinessException("IDEMPOTENCY_KEY_REUSED", HttpStatus.UNPROCESSABLE_ENTITY,
+                         HEADER + " '" + key + "' was already used for a different request");

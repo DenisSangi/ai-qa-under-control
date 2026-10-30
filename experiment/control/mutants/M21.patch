@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/domain/DepositLimitPeriod.java b/player-service/src/main/java/com/arcade/player/domain/DepositLimitPeriod.java
+index a96aa99..282f01f 100644
+--- a/player-service/src/main/java/com/arcade/player/domain/DepositLimitPeriod.java
++++ b/player-service/src/main/java/com/arcade/player/domain/DepositLimitPeriod.java
+@@ -25,7 +25,7 @@ public enum DepositLimitPeriod {
+     /** Path segment: daily | weekly | monthly. */
+     public static DepositLimitPeriod fromPath(String value) {
+         for (DepositLimitPeriod period : values()) {
+-            if (period.name().toLowerCase().equals(value)) {
++            if (period.name().equalsIgnoreCase(value)) {
+                 return period;
+             }
+         }

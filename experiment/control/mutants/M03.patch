@@ -1,0 +1,12 @@
+diff --git a/player-service/src/main/java/com/arcade/player/config/JacksonConfig.java b/player-service/src/main/java/com/arcade/player/config/JacksonConfig.java
+index a938864..4f17f88 100644
+--- a/player-service/src/main/java/com/arcade/player/config/JacksonConfig.java
++++ b/player-service/src/main/java/com/arcade/player/config/JacksonConfig.java
+@@ -17,7 +17,6 @@ public class JacksonConfig {
+     @Bean
+     public Jackson2ObjectMapperBuilderCustomizer strictNumbers() {
+         return builder -> builder.postConfigurer(mapper -> {
+-            mapper.coercionConfigFor(LogicalType.Integer).setCoercion(CoercionInputShape.String, CoercionAction.Fail);
+             mapper.coercionConfigFor(LogicalType.Float).setCoercion(CoercionInputShape.String, CoercionAction.Fail);
+         });
+     }

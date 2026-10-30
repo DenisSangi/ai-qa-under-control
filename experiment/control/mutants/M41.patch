@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..224ebdf 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -68,7 +68,7 @@ public class GameService {
+             throw new BusinessException("ACTIVE_SESSION_EXISTS", HttpStatus.CONFLICT,
+                     "player " + player.getId() + " already has an active session");
+         }
+-        if (player.getBalance().compareTo(request.bet()) < 0) {
++        if (player.getBalance().compareTo(request.bet()) <= 0) {
+             throw new BusinessException("INSUFFICIENT_FUNDS", HttpStatus.UNPROCESSABLE_ENTITY,
+                     "balance " + player.getBalance() + " is lower than bet " + request.bet());
+         }

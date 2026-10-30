@@ -7,3 +7,6 @@ target/
 
 # private working notes (Russian, not for publication)
 /notes/
+
+# Reports of local runs of the published suites (they carry local paths)
+results/suites/*/api-tests/results/

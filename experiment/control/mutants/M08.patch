@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+index 4c275f4..a97d5b9 100644
+--- a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
++++ b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+@@ -102,7 +102,7 @@ public class IdempotencyService {
+      * so a retry with a released key sends the same reference and different players never share one.
+      */
+     public static String reference(Long playerId, String key) {
+-        return UUID.nameUUIDFromBytes((playerId + ":" + key).getBytes(StandardCharsets.UTF_8)).toString();
++        return UUID.nameUUIDFromBytes(key.getBytes(StandardCharsets.UTF_8)).toString();
+     }
+ 
+     private static BusinessException inProgress(String key) {

@@ -1,0 +1,26 @@
+diff --git a/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java b/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
+index a6301e5..9ad0d28 100644
+--- a/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
++++ b/player-service/src/main/java/com/arcade/player/repo/GameSessionRepository.java
+@@ -30,6 +30,8 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long>
+ 
+     boolean existsByPlayerIdAndStatus(Long playerId, SessionStatus status);
+ 
++    boolean existsByPlayerIdAndStatusNot(Long playerId, SessionStatus status);
++
+     /** Ids of ACTIVE sessions started at or before {@code startedBefore}. */
+     @Query("""
+             select s.id from GameSession s
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..c7d565b 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -64,7 +64,7 @@ public class GameService {
+         Player player = players.findByIdForUpdate(request.playerId())
+                 .orElseThrow(() -> new NotFoundException("player " + request.playerId() + " not found"));
+         AmountRange.BET.check(request.bet());
+-        if (sessions.existsByPlayerIdAndStatus(player.getId(), SessionStatus.ACTIVE)) {
++        if (sessions.existsByPlayerIdAndStatusNot(player.getId(), SessionStatus.FINISHED)) {
+             throw new BusinessException("ACTIVE_SESSION_EXISTS", HttpStatus.CONFLICT,
+                     "player " + player.getId() + " already has an active session");
+         }

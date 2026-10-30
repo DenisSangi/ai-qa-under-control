@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java b/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
+index 42ae43f..ffd54a0 100644
+--- a/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
++++ b/player-service/src/main/java/com/arcade/player/service/LeaderboardService.java
+@@ -106,7 +106,7 @@ public class LeaderboardService {
+         LocalDate day = LocalDate.ofInstant(now, ZoneOffset.UTC);
+         int startDay = day.getDayOfMonth() < 11 ? 1 : day.getDayOfMonth() < 21 ? 11 : 21;
+         LocalDate start = day.withDayOfMonth(startDay);
+-        LocalDate end = startDay == 21 ? start.withDayOfMonth(1).plusMonths(1) : start.plusDays(10);
++        LocalDate end = start.plusDays(10);
+         return new Instant[] {start.atStartOfDay(ZoneOffset.UTC).toInstant(), end.atStartOfDay(ZoneOffset.UTC).toInstant()};
+     }
+ 

@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..949dbd4 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -75,7 +75,7 @@ public class PlayerService {
+     /** The idempotency key must already be claimed by IdempotencyService. */
+     @Transactional
+     public Player deposit(Long id, BigDecimal amount, String idempotencyKey) {
+-        AmountRange.DEPOSIT.check(amount);
++        AmountRange.WITHDRAWAL.check(amount);
+         Player player = lock(id);
+         depositLimits.check(id, amount);
+         payment.charge(id, amount, IdempotencyService.reference(id, idempotencyKey));

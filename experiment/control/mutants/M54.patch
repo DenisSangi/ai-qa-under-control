@@ -1,0 +1,17 @@
+diff --git a/player-service/src/main/resources/application.yml b/player-service/src/main/resources/application.yml
+index 60c1c05..a72f948 100644
+--- a/player-service/src/main/resources/application.yml
++++ b/player-service/src/main/resources/application.yml
+@@ -44,10 +44,10 @@ management:
+       show-details: always
+ 
+ app:
+-  leaderboard-cache-ttl-seconds: 30
++  leaderboard-cache-ttl-seconds: 300
+   leaderboard:
+     # How often the top is recomputed besides after each finished session; catches period boundaries.
+-    refresh-interval: PT5S
++    refresh-interval: PT5M
+   session:
+     # A session must be finished before startedAt + timeout, otherwise it expires and the bet is refunded.
+     timeout: PT60S

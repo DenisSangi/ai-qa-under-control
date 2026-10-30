@@ -1,0 +1,23 @@
+diff --git a/player-service/src/main/java/com/arcade/player/web/PlayerController.java b/player-service/src/main/java/com/arcade/player/web/PlayerController.java
+index f339d5a..2c37a11 100644
+--- a/player-service/src/main/java/com/arcade/player/web/PlayerController.java
++++ b/player-service/src/main/java/com/arcade/player/web/PlayerController.java
+@@ -6,6 +6,7 @@ import com.arcade.player.dto.CreatePlayerRequest;
+ import com.arcade.player.dto.DepositRequest;
+ import com.arcade.player.dto.PlayerStatsDto;
+ import com.arcade.player.dto.WithdrawRequest;
++import com.arcade.player.exception.BusinessException;
+ import com.arcade.player.service.IdempotencyService;
+ import com.arcade.player.service.PlayerService;
+ import com.arcade.player.service.StatsClient;
+@@ -108,7 +109,9 @@ public class PlayerController {
+         try {
+             return ResponseEntity.ok(action.get());
+         } catch (RuntimeException e) {
+-            idempotency.release(playerId, key);
++            if (!(e instanceof BusinessException be && be.getStatus() == HttpStatus.BAD_GATEWAY)) {
++                idempotency.release(playerId, key);
++            }
+             throw e;
+         }
+     }

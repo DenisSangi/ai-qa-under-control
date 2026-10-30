@@ -1,0 +1,12 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/GameService.java b/player-service/src/main/java/com/arcade/player/service/GameService.java
+index 9df97e2..19cd212 100644
+--- a/player-service/src/main/java/com/arcade/player/service/GameService.java
++++ b/player-service/src/main/java/com/arcade/player/service/GameService.java
+@@ -137,6 +137,7 @@ public class GameService {
+                 .orElseThrow(() -> new IllegalStateException("session " + sessionId + " has no player"));
+         player.setBalance(player.getBalance().add(session.getBetAmount()));
+         session.setStatus(SessionStatus.EXPIRED);
++        session.setFinishedAt(now);
+         transactions.save(new PaymentTransaction(player.getId(), TxType.REFUND, session.getBetAmount(), now));
+         events.publishSessionEvent(player.getId(), new SessionExpiredEvent(
+                 UUID.randomUUID().toString(), SessionExpiredEvent.TYPE, sessionId, player.getId(),

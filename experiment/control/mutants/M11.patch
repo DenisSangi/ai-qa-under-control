@@ -1,0 +1,31 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/EventPublisher.java b/player-service/src/main/java/com/arcade/player/service/EventPublisher.java
+index fab0e76..258b629 100644
+--- a/player-service/src/main/java/com/arcade/player/service/EventPublisher.java
++++ b/player-service/src/main/java/com/arcade/player/service/EventPublisher.java
+@@ -41,6 +41,6 @@ public class EventPublisher {
+         } catch (JsonProcessingException e) {
+             throw new IllegalStateException("failed to serialize event", e);
+         }
+-        AfterCommit.run("event to " + topic, () -> kafka.send(topic, key, json));
++        kafka.send(topic, key, json);
+     }
+ }
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..6fcb093 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -78,12 +78,12 @@ public class PlayerService {
+         AmountRange.DEPOSIT.check(amount);
+         Player player = lock(id);
+         depositLimits.check(id, amount);
++        events.publishPlayerEvent(new PlayerEvent(
++                UUID.randomUUID().toString(), "DEPOSIT", id, amount, clock.instant().toString()));
+         payment.charge(id, amount, IdempotencyService.reference(id, idempotencyKey));
+         player.setBalance(player.getBalance().add(amount));
+         transactions.save(new PaymentTransaction(id, TxType.DEPOSIT, amount, clock.instant()));
+         idempotency.complete(id, idempotencyKey, player);
+-        events.publishPlayerEvent(new PlayerEvent(
+-                UUID.randomUUID().toString(), "DEPOSIT", id, amount, clock.instant().toString()));
+         return player;
+     }
+ 

@@ -13,7 +13,8 @@
 #
 # Environment:
 #   AQC_BASE      base ref (default: sut-v2, the measured base; generation ran on sut-v1)
-#   AQC_BUGS_DIR  catalog and patches (default: notes/bugs, private until the results are out)
+#   AQC_BUGS_DIR  patches (default: experiment/seeded-bugs, published after the measurement;
+#                 `hash` also needs the catalog, kept private)
 #   AQC_MEASURE   measurement checkout, a git worktree next to the repository
 #                 (default: ../ai-qa-under-control-measure)
 #   AQC_RUN       folder the stand runs from (default: ~/services/arcade-wallet)
@@ -31,7 +32,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
 BASE=${AQC_BASE:-sut-v2}
-BUGS=${AQC_BUGS_DIR:-$ROOT/notes/bugs}
+BUGS=${AQC_BUGS_DIR:-$ROOT/experiment/seeded-bugs}
 MEASURE=${AQC_MEASURE:-$(dirname "$ROOT")/$(basename "$ROOT")-measure}
 RUN=${AQC_RUN:-$HOME/services/arcade-wallet}
 STAND_FILES=$(grep -v '^#' "$ROOT/experiment/stand-files")

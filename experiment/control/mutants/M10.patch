@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/PlayerService.java b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+index 7d43672..dd0a0b5 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PlayerService.java
++++ b/player-service/src/main/java/com/arcade/player/service/PlayerService.java
+@@ -59,7 +59,7 @@ public class PlayerService {
+         Player player = players.save(new Player(request.username(), request.email(), request.country().toUpperCase(),
+                 clock.instant()));
+         events.publishPlayerEvent(new PlayerEvent(
+-                UUID.randomUUID().toString(), "REGISTERED", player.getId(), null, clock.instant().toString()));
++                UUID.randomUUID().toString(), "REGISTERED", player.getId(), BigDecimal.ZERO, clock.instant().toString()));
+         return player;
+     }
+ 

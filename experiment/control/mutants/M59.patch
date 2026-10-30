@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/web/PlayerController.java b/player-service/src/main/java/com/arcade/player/web/PlayerController.java
+index f339d5a..76e94c1 100644
+--- a/player-service/src/main/java/com/arcade/player/web/PlayerController.java
++++ b/player-service/src/main/java/com/arcade/player/web/PlayerController.java
+@@ -103,7 +103,7 @@ public class PlayerController {
+             return ResponseEntity.ok()
+                     .header(IdempotencyService.REPLAYED_HEADER, "true")
+                     .contentType(MediaType.APPLICATION_JSON)
+-                    .body(stored.get());
++                    .body(playerService.get(playerId));
+         }
+         try {
+             return ResponseEntity.ok(action.get());

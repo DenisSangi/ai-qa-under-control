@@ -1,0 +1,12 @@
+diff --git a/player-service/src/main/java/com/arcade/player/domain/DepositLimit.java b/player-service/src/main/java/com/arcade/player/domain/DepositLimit.java
+index b4145f4..ab78333 100644
+--- a/player-service/src/main/java/com/arcade/player/domain/DepositLimit.java
++++ b/player-service/src/main/java/com/arcade/player/domain/DepositLimit.java
+@@ -55,7 +55,6 @@ public class DepositLimit {
+     public void applyDuePendingChange(Instant now) {
+         if (pendingEffectiveAt != null && !now.isBefore(pendingEffectiveAt)) {
+             amount = pendingAmount;
+-            clearPending();
+         }
+     }
+ 

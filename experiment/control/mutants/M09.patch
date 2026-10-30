@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/PaymentClient.java b/player-service/src/main/java/com/arcade/player/service/PaymentClient.java
+index ad82cab..fb77357 100644
+--- a/player-service/src/main/java/com/arcade/player/service/PaymentClient.java
++++ b/player-service/src/main/java/com/arcade/player/service/PaymentClient.java
+@@ -59,7 +59,7 @@ public class PaymentClient {
+             throw new BusinessException(declinedCode, HttpStatus.UNPROCESSABLE_ENTITY,
+                     operation + " declined by provider (http " + e.getStatusCode().value() + ")");
+         } catch (RestClientException e) {
+-            throw new BusinessException("PAYMENT_UNAVAILABLE", HttpStatus.BAD_GATEWAY,
++            throw new BusinessException("PAYMENT_UNAVAILABLE", HttpStatus.SERVICE_UNAVAILABLE,
+                     "payment provider is unreachable");
+         }
+     }

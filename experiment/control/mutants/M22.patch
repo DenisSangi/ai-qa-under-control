@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..ad87cce 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -178,7 +178,7 @@ public class DepositLimitService {
+                         limit.getPendingEffectiveAt())
+                 : null;
+         return new DepositLimitDto(limit.getPeriod(), money(limit.getAmount()), used,
+-                remaining(limit.getAmount(), used), pending);
++                money(limit.getAmount().subtract(used)), pending);
+     }
+ 
+     private void lockPlayer(Long playerId) {

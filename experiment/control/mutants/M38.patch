@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/dto/StartSessionRequest.java b/player-service/src/main/java/com/arcade/player/dto/StartSessionRequest.java
+index e843891..1565185 100644
+--- a/player-service/src/main/java/com/arcade/player/dto/StartSessionRequest.java
++++ b/player-service/src/main/java/com/arcade/player/dto/StartSessionRequest.java
+@@ -10,7 +10,7 @@ import java.math.BigDecimal;
+ public record StartSessionRequest(
+         @NotNull Long playerId,
+         @NotNull
+-        @Pattern(regexp = "slots|roulette|blackjack|poker|crash",
++        @Pattern(regexp = "slots|roulette|blackjack|poker|crash", flags = Pattern.Flag.CASE_INSENSITIVE,
+                 message = "must be one of slots, roulette, blackjack, poker, crash")
+         String game,
+         @NotNull

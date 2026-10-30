@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+index 8cc6d2d..9e79407 100644
+--- a/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
++++ b/player-service/src/main/java/com/arcade/player/service/DepositLimitService.java
+@@ -112,7 +112,7 @@ public class DepositLimitService {
+                 allowed = remaining;
+             }
+         }
+-        if (restrictive != null && amount.compareTo(allowed) > 0) {
++        if (restrictive != null && amount.compareTo(allowed) >= 0) {
+             Map<String, String> details = new LinkedHashMap<>();
+             details.put("period", restrictive.getPeriod().name());
+             details.put("limit", money(restrictive.getAmount()).toPlainString());

@@ -1,0 +1,13 @@
+diff --git a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+index 4c275f4..92d3784 100644
+--- a/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
++++ b/player-service/src/main/java/com/arcade/player/service/IdempotencyService.java
+@@ -74,7 +74,7 @@ public class IdempotencyService {
+                 throw inProgress(key);
+             }
+             if (!record.matches(operation, amount)) {
+-                throw new BusinessException("IDEMPOTENCY_KEY_REUSED", HttpStatus.UNPROCESSABLE_ENTITY,
++                throw new BusinessException("IDEMPOTENCY_KEY_REUSED", HttpStatus.CONFLICT,
+                         HEADER + " '" + key + "' was already used for a different request");
+             }
+             return Optional.of(record.getResponseBody());
