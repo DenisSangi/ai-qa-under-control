@@ -111,3 +111,7 @@ experiment/bugs.sh off --fresh                        # back to the base
 
 The suites ran on JDK 22 and expect a fresh system. Some of their tests are red on the base by design: they catch
 natural bugs the system keeps on purpose, listed in the report.
+
+## License
+
+[MIT](LICENSE): the code, the suites, the specification, the report and the prompts.
